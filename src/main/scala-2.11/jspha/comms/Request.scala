@@ -1,10 +1,9 @@
-package jspha.comms.wire
+package jspha.comms
 
-import cats.data.Xor
 import io.circe.Decoder.Result
+import io.circe._
 
 import scala.collection.immutable.HashMap
-import io.circe._
 
 /**
   * A Comms wire request is a collection of paths along an Api. Since paths

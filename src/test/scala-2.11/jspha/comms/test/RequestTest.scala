@@ -1,9 +1,9 @@
-package jspha.comms.test.wire
+package jspha.comms.test
 
 import cats.data.Xor
-import utest._
-import jspha.comms.wire.{Key, Request}
 import io.circe.{Decoder, DecodingFailure, Encoder, Json}
+import jspha.comms.{Key, Request}
+import utest._
 
 object RequestTest extends TestSuite {
 
@@ -20,7 +20,7 @@ object RequestTest extends TestSuite {
 
       val k1 = Key("name", up.writeJs[Int](3))
       val k2 = Key("name", up.writeJs[Boolean](false))
-      val k3 = Key("name")
+      val k3 = Key("name", ())
 
       val r0 = Request()
       val r1 = Request(k1 -> Request.empty)

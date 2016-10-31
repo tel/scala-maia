@@ -1,6 +1,7 @@
-package jspha.comms.wire
+package jspha.comms
 
 import cats.data.Xor
+
 import scala.collection.immutable.HashMap
 
 /**

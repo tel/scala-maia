@@ -1,7 +1,8 @@
-package jspha.comms.wire
+package jspha.comms
+
+import io.circe.{Decoder, Encoder, Json}
 
 import scala.language.implicitConversions
-import io.circe.{Decoder, Encoder, Json}
 
 /**
   * A Key represents one step along a path in the Api tree. Basic keys are
@@ -11,10 +12,6 @@ import io.circe.{Decoder, Encoder, Json}
 case class Key(name: String, param: Json)
 
 object Key {
-
-  private val nullParam: Json = Encoder[Unit].apply(())
-
-  implicit def apply(name: String): Key = apply(name, nullParam)
 
   def apply[P: Encoder](name: String, param: P): Key =
     apply(name, Encoder[P].apply(param))

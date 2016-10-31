@@ -1,4 +1,4 @@
-package jspha.comms.wire
+package jspha.comms
 
 import cats.Functor
 

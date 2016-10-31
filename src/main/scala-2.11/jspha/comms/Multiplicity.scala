@@ -1,9 +1,8 @@
-package jspha.comms.api
+package jspha.comms
 
-import cats.{Applicative, Eval, Traverse}
-import cats.instances.option._
 import cats.instances.list._
-import jspha.comms.wire.MSet
+import cats.instances.option._
+import cats.{Applicative, Eval, Traverse}
 
 import scala.language.higherKinds
 
