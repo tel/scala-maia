@@ -13,12 +13,12 @@ import scala.collection.immutable.HashMap
   * interpretations under different Apis. In practice, this simply means that
   * in order to parse a request we need an Api.
   */
-case class Request(here: HashMap[Key, Request]) {
+case class Request(here: HashMap[Key.Dyn, Request]) {
 
-  def nest(key: Key): Request =
+  def nest(key: Key.Dyn): Request =
     Request(key -> this)
 
-  def toPairs: List[(Key, Request)] =
+  def toPairs: List[(Key.Dyn, Request)] =
     here.toList
 
   def ++(other: Request): Request =
@@ -32,16 +32,16 @@ case class Request(here: HashMap[Key, Request]) {
 
 object Request {
 
-  def apply(pairs: (Key, Request)*): Request =
+  def apply(pairs: (Key.Dyn, Request)*): Request =
     ofPairs(pairs)
 
-  def ofPairs(pairs: Seq[(Key, Request)]): Request =
+  def ofPairs(pairs: Seq[(Key.Dyn, Request)]): Request =
     Request(HashMap(pairs: _*))
 
   /**
     * The unit request requests a single symbol at the root.
     */
-  def unit(key: Key): Request =
+  def unit(key: Key.Dyn): Request =
     Request(HashMap(key -> empty))
 
   val empty: Request =
@@ -64,13 +64,7 @@ object Request {
   implicit lazy val requestCirceEncoder: Encoder[Request] =
     CirceHelper.lazyEncoder(new Encoder[Request] {
       def apply(a: Request): Json =
-        Encoder[List[(Key, Request)]].apply(a.toPairs)
-    })
-
-  implicit lazy val requestCirceDecoder: Decoder[Request] =
-    CirceHelper.lazyDecoder(new Decoder[Request] {
-      def apply(c: HCursor): Result[Request] =
-        Decoder[List[(Key, Request)]].apply(c).map(Request.ofPairs)
+        Encoder[List[(Key.Dyn, Request)]].apply(a.toPairs)
     })
 
 }

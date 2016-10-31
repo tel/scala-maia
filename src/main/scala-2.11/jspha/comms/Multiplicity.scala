@@ -46,6 +46,7 @@ object Multiplicity {
     */
   trait MSelector[M <: Multiplicity] {
     def apply[T](m: MSet[T]): Option[M#Apply[T]]
+    def embed[T](s: M#Apply[T]): MSet[T]
   }
 
   object MSelector {
@@ -54,6 +55,8 @@ object Multiplicity {
         case MSet.One(t) => Some(t)
         case _ => None
       }
+
+      def embed[T](s: T): MSet[T] = MSet.One(s)
     }
     implicit val MSelectorZeroOrOne: MSelector[ZeroOrOne] =
       new MSelector[ZeroOrOne] {
@@ -61,12 +64,16 @@ object Multiplicity {
           case MSet.ZeroOrOne(t) => Some(t)
           case _ => None
         }
+
+        def embed[T](s: Option[T]): MSet[T] = MSet.ZeroOrOne(s)
       }
     implicit val MSelectorMany: MSelector[Many] = new MSelector[Many] {
       def apply[T](m: MSet[T]): Option[List[T]] = m match {
         case MSet.Many(t) => Some(t)
         case _ => None
       }
+
+      def embed[T](s: List[T]): MSet[T] = MSet.Many(s)
     }
   }
 }
