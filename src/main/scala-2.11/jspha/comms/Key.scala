@@ -51,8 +51,8 @@ object Key {
 
     // Cannot be implicit since it really depends upon the (otherwise known)
     // value of A.
-    def dynamicKeyDecoder[A: Encoder: Decoder: TypeTag]: Decoder[Dyn] =
-      keyDecoder(Decoder[A]).map(_.forget)
+    def dynamicKeyDecoder[P: Encoder: Decoder: TypeTag]: Decoder[Dyn] =
+      keyDecoder(Decoder[P]).map(_.forget)
 
   }
 

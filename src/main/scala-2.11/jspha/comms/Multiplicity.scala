@@ -3,7 +3,10 @@ package jspha.comms
 import cats.instances.list._
 import cats.instances.option._
 import cats.{Applicative, Eval, Traverse}
+import io.circe.Decoder
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
 import scala.language.higherKinds
 
 /**
@@ -47,6 +50,7 @@ object Multiplicity {
   trait MSelector[M <: Multiplicity] {
     def apply[T](m: MSet[T]): Option[M#Apply[T]]
     def embed[T](s: M#Apply[T]): MSet[T]
+    def decoder[A](implicit decoderA: Decoder[A]): Decoder[M#Apply[A]]
   }
 
   object MSelector {
@@ -57,6 +61,8 @@ object Multiplicity {
       }
 
       def embed[T](s: T): MSet[T] = MSet.One(s)
+
+      def decoder[A](implicit decoderA: Decoder[A]): Decoder[A] = decoderA
     }
     implicit val MSelectorZeroOrOne: MSelector[ZeroOrOne] =
       new MSelector[ZeroOrOne] {
@@ -66,6 +72,9 @@ object Multiplicity {
         }
 
         def embed[T](s: Option[T]): MSet[T] = MSet.ZeroOrOne(s)
+
+        def decoder[A](implicit decoderA: Decoder[A]): Decoder[Option[A]] =
+          Decoder.decodeOption(decoderA)
       }
     implicit val MSelectorMany: MSelector[Many] = new MSelector[Many] {
       def apply[T](m: MSet[T]): Option[List[T]] = m match {
@@ -74,6 +83,9 @@ object Multiplicity {
       }
 
       def embed[T](s: List[T]): MSet[T] = MSet.Many(s)
+
+      def decoder[A](implicit decoderA: Decoder[A]): Decoder[List[A]] =
+        Decoder.decodeCanBuildFrom(decoderA, implicitly)
     }
   }
 }
