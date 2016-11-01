@@ -15,14 +15,14 @@ import scala.language.higherKinds
   * fetched. Beyond this there is `ZeroOrOne` which means that the item may
   * not exist and `Many` which means pretty much what it says.
   */
-sealed trait Multiplicity {
+sealed trait Mult {
   type Apply[T]
 }
 
-object Multiplicity {
-  sealed trait One extends Multiplicity { type Apply[T] = T }
-  sealed trait ZeroOrOne extends Multiplicity { type Apply[T] = Option[T] }
-  sealed trait Many extends Multiplicity { type Apply[T] = List[T] }
+object Mult {
+  sealed trait One extends Mult { type Apply[T] = T }
+  sealed trait ZeroOrOne extends Mult { type Apply[T] = Option[T] }
+  sealed trait Many extends Mult { type Apply[T] = List[T] }
 
   object instances {
     implicit val OneApplyTraverse: Traverse[One#Apply] =
@@ -47,7 +47,7 @@ object Multiplicity {
   /**
     * Eliminates an MSet with the right type.
     */
-  trait MSelector[M <: Multiplicity] {
+  trait MSelector[M <: Mult] {
     def apply[T](m: MSet[T]): Option[M#Apply[T]]
     def embed[T](s: M#Apply[T]): MSet[T]
     def decoder[A](implicit decoderA: Decoder[A]): Decoder[M#Apply[A]]
