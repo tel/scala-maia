@@ -19,6 +19,14 @@ case class Response(here: HashMap[Key.Dyn, MSet[Dyn] Xor MSet[Response]]) {
   def nest(key: Key.Dyn): Response =
     Response(key -> Xor.right(MSet.one(this)))
 
+  def ++(other: Response): Response =
+    Response(here.merged(other.here) {
+      case ((k1, v1), (k2, v2)) => (k1, v1)
+    })
+
+  def +(pair: (Key.Dyn, MSet[Dyn] Xor MSet[Response])): Response =
+    Response(here + pair)
+
 }
 
 object Response {
