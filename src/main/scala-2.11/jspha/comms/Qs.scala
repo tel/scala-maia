@@ -19,3 +19,5 @@ trait Qs {
   final type A1[T] = Atomic1[T]
   final type N1[T[_ <: Qs]] = Nested1[T]
 }
+
+case class Loc[S <: Qs](lat: S#A1[Double], lon: S#A1[Double])

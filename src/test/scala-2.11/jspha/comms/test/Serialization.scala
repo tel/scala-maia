@@ -41,9 +41,13 @@ object Serialization extends TestSuite {
 
       val xWit = Witness('x)
       type K = xWit.T
-      type V = RespS#Atomic[NoParam, Mult.One, Int]
+      type P = NoParam
+      type M = Mult.One
+      type A = Int
+      type V = RespS#Atomic[P, M, A]
+      type T = HNil
 
-      val test3 = implicitly[ObjRespEncoder[FieldType[K, V] :: HNil]]
+      val test3 = implicitly[ObjRespEncoder[FieldType[K, V] :: T]]
 //      val test4 = implicitly[ResponseEncoder[Test1]]
 
     }

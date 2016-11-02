@@ -5,7 +5,6 @@
 package jspha.comms.qs
 
 import io.circe._
-import io.circe.syntax._
 
 import scala.language.higherKinds
 import jspha.comms._
@@ -47,13 +46,19 @@ object RespS {
           def encodeObject(a: HNil): JsonObject = JsonObject.empty
         }
 
-      implicit def HConsAtomicObjRespEncoder[K <: Symbol, V, T <: HList](
-          implicit objEncT: Lazy[ObjRespEncoder[T]],
-          eqv: V =:= RespS#Atomic[NoParam, Mult.One, Int]
-      ): ObjRespEncoder[FieldType[K, V] :: T] =
-        new ObjRespEncoder[FieldType[K, V] :: T] {
-          def encodeObject(a: FieldType[K, V] :: T) =
-            objEncT.value.encodeObject(a.tail)
+      implicit def HConsAtomicObjRespEncoder[K <: Symbol,
+                                             P,
+                                             M <: Mult,
+                                             A,
+                                             T <: HList](
+//          implicit objEncT: Lazy[ObjRespEncoder[T]]
+      ): ObjRespEncoder[FieldType[K, RespS#Atomic[P, M, A]] :: T] =
+        new ObjRespEncoder[FieldType[K, RespS#Atomic[P, M, A]] :: T] {
+          def encodeObject(a: FieldType[K, RespS#Atomic[P, M, A]] :: T) = {
+//            objEncT.value.encodeObject(a.tail)
+            JsonObject.empty
+          }
+
         }
 
     }
