@@ -3,18 +3,29 @@
 
 *Typeful data fetching in Scala.js, a la GraphQL*
 
-GraphQL demonstrates that REST-like API designs can be inefficient and 
-clumsy in situations where sophisticated, rapidly changing data fetches 
-are common such as in rich web and mobile applications. REST's 
-presentation of data as a collection of endpoints and links obfuscates 
-the often hierarchical, graphical nature of data requiring both
-repeated back-and-forth transfers to traverse the graph and either 
-HATEOAS or fragile encodings of API structure in all clients.
+## Welcome
 
-Comms, like GraphQL, represents the entire API of your application as a 
-hierarchy of typed queries. It enables "bulk" queries that return a 
-subgraph of the total data structure all at once and eliminate 
-back-and-forth traversals.
+Comms is a Scala library for the JVM and Javascript platforms that 
+enables application authors to share structured data between processes 
+using a well-typed query language. It shares similar goals with the 
+larger [GraphQL project](http://graphql.org/) but is optimized for the 
+Scala platform and ecosystem and offers more type-level guarantees to
+users for that restriction.
 
-Unlike GraphQL, Comms is designed from the ground up to work seamlessly 
-within Scala's type system.
+## Usage
+
+Comms is currently *pre-alpha* software and therefore doesn't even claim
+to work or be installable. There is no public distribution yet available 
+or release methodology.
+
+## License, generally
+
+Code should be licensed under the Mozilla Public License Version 2.0. 
+The MPL operates on a file-by-file basis. Commits adding new files 
+should include the following MPL license header at the top of the file
+
+```
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+```
