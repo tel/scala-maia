@@ -1,20 +1,19 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package jspha.comms
 
 import scala.language.higherKinds
-import io.circe.{Decoder, Encoder}
+import io.circe.Encoder
 
 package object qs {
 
   type Request[Api[_ <: Qs]] = Api[ReqS]
   type Response[Api[_ <: Qs]] = Api[RespS]
 
-  implicit def ResponseEncoder[Api[_ <: Qs]]: Encoder[Response[Api]] =
-    ???
-
-  implicit def ResponseDecoder[Api[_ <: Qs]]: Decoder[Response[Api]] =
-    ???
-
-  implicit def RequestEncoder[Api[_ <: Qs]: ReqS.ToWire]: Encoder[Request[Api]] =
+  implicit def buildRequestEncoder[Api[_ <: Qs]: ReqS.ToWire]
+    : Encoder[Request[Api]] =
     Encoder[wire.Request].contramap(ReqS.toWire[Api])
 
 }

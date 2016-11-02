@@ -1,6 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package jspha.comms.qs
 
-import cats.data.Xor
 import io.circe.KeyEncoder
 
 import scala.language.higherKinds
@@ -29,8 +32,8 @@ object ReqS {
     def apply[Api[_ <: Qs]](implicit D: ToWire[Api]): ToWire[Api] = D
 
     implicit def GenericToWire[Api[_ <: Qs], Repr <: HList](
-      implicit gen: LabelledGeneric.Aux[Request[Api], Repr],
-      autoRepr: Lazy[Auto[Repr]]
+        implicit gen: LabelledGeneric.Aux[Request[Api], Repr],
+        autoRepr: Lazy[Auto[Repr]]
     ): ToWire[Api] = new ToWire[Api] {
       def toWire(req: Request[Api]): wire.Request =
         autoRepr.value.toWire(gen.to(req))

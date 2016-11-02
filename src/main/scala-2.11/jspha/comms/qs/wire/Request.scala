@@ -1,11 +1,14 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package jspha.comms.qs.wire
 
+import scala.collection.immutable.HashMap
 import cats.Monoid
 import cats.data.Xor
-import io.circe.Decoder.Result
-
-import scala.collection.immutable.HashMap
 import io.circe._
+import jspha.comms.util.CirceUtils
 
 // NOTE: We use HashMaps here so that we can use the .merged method
 case class Request(
@@ -61,20 +64,13 @@ object Request {
     Request(name -> localXor)
   }
 
-  private def lazyEncoder[A](delegate: => Encoder[A]): Encoder[A] =
-    new Encoder[A] {
-      lazy val _delegate: Encoder[A] = delegate
-      def apply(a: A): Json = _delegate(a)
-    }
-
-  private def lazyDecoder[A](delegate: => Decoder[A]): Decoder[A] =
-    new Decoder[A] {
-      lazy val _delegate: Decoder[A] = delegate
-      def apply(c: HCursor): Result[A] = _delegate(c)
-    }
+  implicit val RequestIsMonoid: Monoid[Request] = new Monoid[Request] {
+    def empty: Request = zero
+    def combine(x: Request, y: Request): Request = x ++ y
+  }
 
   implicit lazy val RequestEncoder: Encoder[Request] =
-    lazyEncoder {
+    CirceUtils.lazyEncoder {
       val hashMapEnc: Encoder[HashMap[String, Request]] =
         Encoder.encodeMapLike(implicitly, RequestEncoder)
       val xorEnc: Encoder[Value] =
@@ -85,7 +81,7 @@ object Request {
     }
 
   implicit lazy val RequestDecoder: Decoder[Request] =
-    lazyDecoder {
+    CirceUtils.lazyDecoder {
       val hashMapDec: Decoder[HashMap[String, Request]] =
         Decoder.decodeMapLike(implicitly, RequestDecoder, implicitly)
       val xorDec: Decoder[Value] =
@@ -94,10 +90,5 @@ object Request {
         Decoder.decodeMapLike(implicitly, xorDec, implicitly)
       mapDec.map(Request(_))
     }
-
-  implicit val RequestIsMonoid: Monoid[Request] = new Monoid[Request] {
-    def empty: Request = zero
-    def combine(x: Request, y: Request): Request = x ++ y
-  }
 
 }

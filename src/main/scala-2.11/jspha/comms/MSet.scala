@@ -1,6 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package jspha.comms
 
 import cats.Functor
+import io.circe._
+import io.circe.generic.semiauto._
 
 /**
   * An MSet is the union of all kinds of multiplicities.
@@ -24,5 +30,11 @@ object MSet {
       case Many(s) => Many(s.map(f))
     }
   }
+
+  implicit def makeEncoder[A](implicit enc: Encoder[A]): Encoder[MSet[A]] =
+    deriveEncoder[MSet[A]]
+
+  implicit def makeDecoder[A](implicit enc: Decoder[A]): Decoder[MSet[A]] =
+    deriveDecoder[MSet[A]]
 
 }
