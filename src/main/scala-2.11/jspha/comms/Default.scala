@@ -15,12 +15,8 @@ trait Default[T] {
 
 object Default {
 
-  def apply[T](t: T): Default[T] = new Default[T] {
-    val value: T = t
-  }
-
-  implicit val DefaultParamUnit: Default[Unit] =
-    apply(())
+  def apply[T](t: T): Default[T] =
+    new Default[T] { val value: T = t }
 
   implicit def DefaultParamOption[A]: Default[Option[A]] =
     apply(None)
