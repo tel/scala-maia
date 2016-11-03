@@ -4,31 +4,38 @@
 
 package jspha.comms.util
 
-import jspha.comms.{CSet, Cardinality}
+import jspha.comms._
 
 trait Narrowing[C <: Cardinality] {
-  def pf[A]: PartialFunction[CSet[A], Unit]
-  def apply[A](set: CSet[A]): Option[C#Wrap[A]] =
-    if (pf.isDefinedAt(set)) Some(set.asInstanceOf) else None
+  def apply[A](set: CSet[A]): Option[C#Wrap[A]]
 }
 
 object Narrowing {
 
   import Cardinality._
 
-  implicit val SingularNarrowing: Narrowing[Singular] =
+  implicit val ofSingular: Narrowing[Singular] =
     new Narrowing[Singular] {
-      def pf[A] = { case CSet.Singular(_) => () }
+      def apply[A](set: CSet[A]): Option[CSet.Singular[A]] = set match {
+        case CSet.Singular(v) => Some(set.asInstanceOf[CSet.Singular[A]])
+        case _ => None
+      }
     }
 
-  implicit val OptionalNarrowing: Narrowing[Optional] =
+  implicit val ofOptional: Narrowing[Optional] =
     new Narrowing[Optional] {
-      def pf[A] = { case CSet.Optional(_) => () }
+      def apply[A](set: CSet[A]): Option[CSet.Optional[A]] = set match {
+        case CSet.Optional(v) => Some(set.asInstanceOf[CSet.Optional[A]])
+        case _ => None
+      }
     }
 
-  implicit val VariableNarrowing: Narrowing[Variable] =
+  implicit val ofVariable: Narrowing[Variable] =
     new Narrowing[Variable] {
-      def pf[A] = { case CSet.Variable(_) => () }
+      def apply[A](set: CSet[A]): Option[CSet.Variable[A]] = set match {
+        case CSet.Variable(v) => Some(set.asInstanceOf[CSet.Variable[A]])
+        case _ => None
+      }
     }
 
 }
