@@ -7,7 +7,7 @@ package jspha.comms
 import scala.language.higherKinds
 import scala.collection.immutable.HashMap
 
-trait RespSpec extends Spec {
+trait ResponseSpec extends Spec {
   type Atomic[P, M <: Cardinality, T] =
     HashMap[P, M#Wrap[T]]
   type Nested[P, M <: Cardinality, T[_ <: Spec]] =

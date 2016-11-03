@@ -7,18 +7,9 @@ package jspha.comms
 import scala.language.higherKinds
 import scala.collection.immutable.HashMap
 
-trait ReqSpec extends Spec {
+trait RequestSpec extends Spec {
   type Atomic[P, M <: Cardinality, T] =
     Set[P]
   type Nested[P, M <: Cardinality, T[_ <: Spec]] =
     HashMap[P, Request[T]]
-}
-
-object ReqSpec {
-
-  def toWire[Api[_ <: Spec]](req: Request[Api])(
-      implicit toWire: ToWire[Api]): wire.Request = toWire(req)
-
-  trait ToWire[Api[_ <: Spec]] extends (Request[Api] => wire.Request)
-
 }

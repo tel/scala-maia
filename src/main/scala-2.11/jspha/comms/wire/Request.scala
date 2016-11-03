@@ -64,15 +64,15 @@ object Request {
     Request(name -> localXor)
   }
 
-  implicit val RequestIsMonoid: Monoid[Request] = new Monoid[Request] {
+  implicit val isMonoid: Monoid[Request] = new Monoid[Request] {
     def empty: Request = zero
     def combine(x: Request, y: Request): Request = x ++ y
   }
 
-  implicit lazy val RequestEncoder: Encoder[Request] =
+  implicit lazy val hasEncoder: Encoder[Request] =
     CirceUtils.lazyEncoder {
       val hashMapEnc: Encoder[HashMap[String, Request]] =
-        Encoder.encodeMapLike(implicitly, RequestEncoder)
+        Encoder.encodeMapLike(implicitly, hasEncoder)
       val xorEnc: Encoder[Value] =
         Encoder.encodeXor("Atomic", "Nested")(implicitly, hashMapEnc)
       val mapEnc: Encoder[HashMap[Symbol, Value]] =
@@ -80,10 +80,10 @@ object Request {
       mapEnc.contramap(_.here)
     }
 
-  implicit lazy val RequestDecoder: Decoder[Request] =
+  implicit lazy val hasDecoder: Decoder[Request] =
     CirceUtils.lazyDecoder {
       val hashMapDec: Decoder[HashMap[String, Request]] =
-        Decoder.decodeMapLike(implicitly, RequestDecoder, implicitly)
+        Decoder.decodeMapLike(implicitly, hasDecoder, implicitly)
       val xorDec: Decoder[Value] =
         Decoder.decodeXor("Atomic", "Nested")(implicitly, hashMapDec)
       val mapDec: Decoder[HashMap[Symbol, Value]] =

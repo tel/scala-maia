@@ -7,6 +7,7 @@ package jspha.comms
 import cats.Functor
 import cats.data.Xor
 import io.circe.{Decoder, Encoder, Json}
+import jspha.comms.util.Narrowing
 
 /**
   * A CSet, "cardinal set", is a collection of values with a known
