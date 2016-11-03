@@ -7,7 +7,7 @@ package jspha.comms
 import cats.Functor
 import cats.data.Xor
 import io.circe.{Decoder, Encoder, Json}
-import jspha.comms.util.Narrowing
+import jspha.comms.util.Narrows
 
 /**
   * A CSet, "cardinal set", is a collection of values with a known
@@ -17,7 +17,7 @@ sealed trait CSet[A] {
 
   type Size <: Cardinality
 
-  def narrow[C <: Cardinality](implicit narrows: Narrowing[C]): Option[C#Wrap[A]] =
+  def narrow[C <: Cardinality](implicit narrows: Narrows[C]): Option[C#Wrap[A]] =
     narrows(this)
 
   def map[B](f: A => B): CSet[B]

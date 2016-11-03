@@ -2,9 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package jspha.comms.util
+package jspha.comms.requestAux
 
-import scala.language.higherKinds
 import jspha.comms._
 
-trait ToWire[Api[_ <: Spec]] extends (Request[Api] => wire.Request)
+import scala.language.higherKinds
+
+trait ToWire[Api[_ <: Spec]]
+  extends (Request[Api] => wire.Request)
