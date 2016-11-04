@@ -48,6 +48,17 @@ object ResponseEncodingTest extends TestSuite {
         val yRepr = """{"1":{"Variable":[1,2,3]},"2":{"Variable":[4,5,6]}}"""
         resp.asJson.noSpaces ==> s"""{"x":$xRepr,"y":$yRepr}"""
       }
+      'SingleNested {
+        case class Inner[S <: Spec]()
+        case class Outer[S <: Spec](
+          inner: S#Nested[Na, Cardinality.Singular, Inner]
+        )
+        val respInner: Response[Inner] = Inner()
+        val resp: Response[Outer] = Outer[ResponseSpec](
+          inner = HashMap(Na() -> CSet.Singular(respInner))
+        )
+        resp.asJson.noSpaces ==> """{"inner":{"":{"Singular":{}}}}"""
+      }
     }
 
     'ObjectEncoder {
