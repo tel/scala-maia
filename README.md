@@ -1,6 +1,8 @@
 
 # Comms
 
+[![Build Status](https://travis-ci.org/tel/scala-comms.svg?branch=master)](https://travis-ci.org/tel/scala-comms)
+
 *Typeful data fetching in Scala.js, a la GraphQL*
 
 ## Welcome
