@@ -3,7 +3,7 @@
 
 name := "comms"
 version := "1.0"
-scalaVersion := "2.12.0"
+scalaVersion := "2.11.8"
 licenses := Seq("MPLv2" -> url("http://mozilla.org/MPL/2.0/"))
 homepage := Some(url("http://github.com/tel/scala-comms"))
 
