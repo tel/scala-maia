@@ -9,19 +9,19 @@ import jspha.comms._
 import io.circe._
 import shapeless._
 
-trait HasEncoder[Api[_ <: Spec]] extends Encoder[Response[Api]] {
-  val encoder: Encoder[Response[Api]]
-  def apply(a: Response[Api]): Json = encoder(a)
+trait HasEncoder[Api[_ <: Spec], E] extends Encoder[Response[Api, E]] {
+  val encoder: Encoder[Response[Api, E]]
+  def apply(a: Response[Api, E]): Json = encoder(a)
 }
 
 object HasEncoder {
 
-  implicit def fromGeneric[Api[_ <: Spec], Repr <: HList](
-      implicit gen: LabelledGeneric.Aux[Response[Api], Repr],
+  implicit def fromGeneric[Api[_ <: Spec], E, Repr <: HList](
+      implicit gen: LabelledGeneric.Aux[Response[Api, E], Repr],
       oe: ObjectEncoder[Repr]
-  ): HasEncoder[Api] =
-    new HasEncoder[Api] {
-      val encoder: Encoder[Response[Api]] =
+  ): HasEncoder[Api, E] =
+    new HasEncoder[Api, E] {
+      val encoder: Encoder[Response[Api, E]] =
         oe.contramap(gen.to)
     }
 

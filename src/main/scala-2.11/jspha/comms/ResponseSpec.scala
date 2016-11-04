@@ -4,12 +4,14 @@
 
 package jspha.comms
 
+import cats.data.Xor
+
 import scala.language.higherKinds
 import scala.collection.immutable.HashMap
 
-trait ResponseSpec extends Spec {
+trait ResponseSpec[E] extends Spec {
   type Atomic[P, M <: Cardinality, T] =
-    HashMap[P, M#Wrap[T]]
+    HashMap[P, Xor[E, M#Wrap[T]]]
   type Nested[P, M <: Cardinality, T[_ <: Spec]] =
-    HashMap[P, M#Wrap[Response[T]]]
+    HashMap[P, Xor[E, M#Wrap[Response[T, E]]]]
 }

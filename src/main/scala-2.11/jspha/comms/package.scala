@@ -11,7 +11,7 @@ import scala.language.higherKinds
 package object comms {
 
   type Request[Api[_ <: Spec]] = Api[RequestSpec]
-  type Response[Api[_ <: Spec]] = Api[ResponseSpec]
+  type Response[Api[_ <: Spec], E] = Api[ResponseSpec[E]]
 
   implicit class RequestOps[Api[_ <: Spec]](request: Request[Api]) {
     def toWire(implicit f: requestAux.ToWire[Api]): wire.Request =
@@ -20,8 +20,8 @@ package object comms {
       wire.Request.hasEncoder(toWire)
   }
 
-  implicit class ResponseOps[Api[_ <: Spec]](response: Response[Api]) {
-    def asJson(implicit e: responseAux.HasEncoder[Api]): Json =
+  implicit class ResponseOps[Api[_ <: Spec], E](response: Response[Api, E]) {
+    def asJson(implicit e: responseAux.HasEncoder[Api, E]): Json =
       e(response)
   }
 
