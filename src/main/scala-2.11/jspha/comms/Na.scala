@@ -14,16 +14,16 @@ case class Na()
 
 object Na {
 
-  implicit val NoParamDefault: Default[Na] =
+  implicit val hasDefault: Default[Na] =
     Default(Na())
 
-  implicit val NoParamKeyEncoder: KeyEncoder[Na] =
+  implicit val hasKeyEncoder: KeyEncoder[Na] =
     new KeyEncoder[Na] {
       def apply(key: Na): String =
         ""
     }
 
-  implicit val NoParamKeyDecoder: KeyDecoder[Na] =
+  implicit val hasKeyDecoder: KeyDecoder[Na] =
     new KeyDecoder[Na] {
       def apply(key: String): Option[Na] =
         Some(Na())

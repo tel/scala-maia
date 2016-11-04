@@ -25,21 +25,4 @@ package object comms {
       e(response)
   }
 
-  object X {
-    import shapeless._
-    import shapeless.labelled._
-    import jspha.comms.{responseAux => rA}
-
-    val xWit = Witness('x)
-
-    val hnil = implicitly[rA.ObjectEncoder[HNil]]
-    val atomic = implicitly[
-      rA.ObjectEncoder[
-        FieldType[
-          xWit.T,
-          ResponseSpec#Atomic[Na, Cardinality.Singular, Int]
-          ] :: HNil]]
-
-  }
-
 }

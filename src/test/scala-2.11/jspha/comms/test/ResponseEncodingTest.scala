@@ -8,9 +8,13 @@ import utest._
 import shapeless._
 import shapeless.labelled._
 import jspha.comms._
-
 import scala.collection.immutable.HashMap
 
+/**
+  * NOTE: Response encodings are not actually part of a public interface but
+  * instead are merely gold standard tests to ensure that the encoders are
+  * being properly generated.
+  */
 object ResponseEncodingTest extends TestSuite {
 
   val tests = this {
@@ -18,14 +22,31 @@ object ResponseEncodingTest extends TestSuite {
     'Encoder {
       'Non {
         case class Non[S <: Spec]()
-        val nonResp: Response[Non] = Non()
-        nonResp.asJson.noSpaces ==> """{}"""
+        val resp: Response[Non] = Non()
+        resp.asJson.noSpaces ==> """{}"""
       }
       'SingleAtomic {
         case class Single[S <: Spec](x: S#Atomic[Na, Cardinality.Singular, Int])
-        val singleResp: Response[Single] =
+        val resp: Response[Single] =
           Single[ResponseSpec](x = HashMap(Na() -> CSet.Singular(10)))
-        singleResp.asJson.noSpaces ==> """{"x":{"":{"Singular":10}}}"""
+        resp.asJson.noSpaces ==> """{"x":{"":{"Singular":10}}}"""
+      }
+      'DoubleAtomic {
+        case class Double[S <: Spec](
+          x: S#Atomic[Na, Cardinality.Singular, Int],
+          y: S#Atomic[Int, Cardinality.Variable, Int]
+        )
+        val resp: Response[Double] =
+          Double[ResponseSpec](
+            x = HashMap(Na() -> CSet.Singular(10)),
+            y = HashMap(
+              1 -> CSet.Variable(List(1, 2, 3)),
+              2 -> CSet.Variable(List(4, 5, 6))
+            )
+          )
+        val xRepr = """{"":{"Singular":10}}"""
+        val yRepr = """{"1":{"Variable":[1,2,3]},"2":{"Variable":[4,5,6]}}"""
+        resp.asJson.noSpaces ==> s"""{"x":$xRepr,"y":$yRepr}"""
       }
     }
 
