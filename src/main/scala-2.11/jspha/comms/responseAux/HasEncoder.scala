@@ -6,17 +6,23 @@ package jspha.comms.responseAux
 
 import scala.language.higherKinds
 import jspha.comms._
-import io.circe
+import io.circe._
 import shapeless._
 
-trait Encoder[Api[_ <: Spec]] extends circe.Encoder[Response[Api]]
+trait HasEncoder[Api[_ <: Spec]] extends Encoder[Response[Api]] {
+  val encoder: Encoder[Response[Api]]
+  def apply(a: Response[Api]): Json = encoder(a)
+}
 
-object Encoder {
+object HasEncoder {
 
   implicit def fromGeneric[Api[_ <: Spec], Repr <: HList](
       implicit gen: LabelledGeneric.Aux[Response[Api], Repr],
       oe: ObjectEncoder[Repr]
-  ): circe.Encoder[Response[Api]] =
-    oe.contramap(gen.to)
+  ): HasEncoder[Api] =
+    new HasEncoder[Api] {
+      val encoder: Encoder[Response[Api]] =
+        oe.contramap(gen.to)
+    }
 
 }

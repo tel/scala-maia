@@ -13,15 +13,16 @@ package object comms {
   type Request[Api[_ <: Spec]] = Api[RequestSpec]
   type Response[Api[_ <: Spec]] = Api[ResponseSpec]
 
-  implicit class RequestOps[Api[_ <: Spec]](req: Request[Api]) {
+  implicit class RequestOps[Api[_ <: Spec]](request: Request[Api]) {
     def toWire(implicit f: requestAux.ToWire[Api]): wire.Request =
-      f(req)
+      f(request)
     def asJson(implicit f: requestAux.ToWire[Api]): Json =
       wire.Request.hasEncoder(toWire)
   }
 
   implicit class ResponseOps[Api[_ <: Spec]](response: Response[Api]) {
-
+    def asJson(implicit e: responseAux.HasEncoder[Api]): Json =
+      e(response)
   }
 
   object X {

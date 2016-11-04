@@ -7,7 +7,6 @@ package jspha.comms.responseAux
 import scala.language.higherKinds
 import io.circe
 import io.circe.JsonObject
-import jspha.comms._
 import shapeless._
 import shapeless.labelled._
 
@@ -24,16 +23,20 @@ object ObjectEncoder {
   implicit def ofAtomicHCons[K <: Symbol,
                              P,
                              A,
-                             F[_] <: CSet[_],
-                             C <: Cardinality,
+                             F[_],
                              T <: HList](
       implicit oeT: ObjectEncoder[T],
       kWit: Witness.Aux[K],
-      cardEqv: C =:= F[A]#Size
+      aEnc: circe.Encoder[F[A]],
+      pEnc: circe.KeyEncoder[P]
   ): ObjectEncoder[FieldType[K, HashMap[P, F[A]]] :: T] =
     new ObjectEncoder[FieldType[K, HashMap[P, F[A]]] :: T] {
-      def encodeObject(a: FieldType[K, HashMap[P, F[A]]] :: T) =
-        oeT.encodeObject(a.tail)
+      def encodeObject(a: FieldType[K, HashMap[P, F[A]]] :: T) = {
+        val valueEncoder: circe.Encoder[HashMap[P, F[A]]] =
+          circe.Encoder.encodeMapLike[HashMap, P, F[A]]
+        val name = kWit.value.name
+        (name -> valueEncoder(a.head)) +: oeT.encodeObject(a.tail)
+      }
     }
 
 }
