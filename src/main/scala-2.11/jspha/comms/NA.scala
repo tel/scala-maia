@@ -10,22 +10,22 @@ import io.circe.{KeyDecoder, KeyEncoder}
   * Na, not applicable, is a singleton type which indicates a default
   * argument for an Api specification.
   */
-case class Na()
+case class NA()
 
-object Na {
+object NA {
 
-  implicit val hasDefault: Default[Na] =
-    Default(Na())
+  implicit val hasDefault: Default[NA] =
+    Default(NA())
 
-  implicit val hasKeyEncoder: KeyEncoder[Na] =
-    new KeyEncoder[Na] {
-      def apply(key: Na): String =
+  implicit val hasKeyEncoder: KeyEncoder[NA] =
+    new KeyEncoder[NA] {
+      def apply(key: NA): String =
         ""
     }
 
-  implicit val hasKeyDecoder: KeyDecoder[Na] =
-    new KeyDecoder[Na] {
-      def apply(key: String): Option[Na] =
-        Some(Na())
+  implicit val hasKeyDecoder: KeyDecoder[NA] =
+    new KeyDecoder[NA] {
+      def apply(key: String): Option[NA] =
+        Some(NA())
     }
 }

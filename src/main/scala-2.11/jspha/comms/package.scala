@@ -5,6 +5,7 @@
 package jspha
 
 import io.circe.Json
+import jspha.comms.requestAux.WireRequest
 
 import scala.language.higherKinds
 
@@ -14,10 +15,10 @@ package object comms {
   type Response[Api[_ <: Spec], E] = Api[ResponseSpec[E]]
 
   implicit class RequestOps[Api[_ <: Spec]](request: Request[Api]) {
-    def toWire(implicit f: requestAux.ToWire[Api]): wire.Request =
+    def toWire(implicit f: requestAux.ToWire[Api]): WireRequest =
       f(request)
     def asJson(implicit f: requestAux.ToWire[Api]): Json =
-      wire.Request.hasEncoder(toWire)
+      WireRequest.hasEncoder(toWire)
   }
 
   implicit class ResponseOps[Api[_ <: Spec], E](response: Response[Api, E]) {

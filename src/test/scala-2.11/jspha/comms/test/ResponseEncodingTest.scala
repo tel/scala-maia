@@ -30,21 +30,21 @@ object ResponseEncodingTest extends TestSuite {
         resp.asJson.noSpaces ==> """{}"""
       }
       'SingleAtomic {
-        case class Single[S <: Spec](x: S#Atomic[Na, Cardinality.Singular, Int])
+        case class Single[S <: Spec](x: S#Atomic[NA, Cardinality.Singular, Int])
         val resp: Response[Single, E] =
           Single[ResponseSpec[E]](
-            x = HashMap(Na() -> Xor.right(CSet.Singular(10)))
+            x = HashMap(NA() -> Xor.right(CSet.Singular(10)))
           )
         resp.asJson.noSpaces ==> """{"x":{"":{"Ok":{"Singular":10}}}}"""
       }
       'DoubleAtomic {
         case class Double[S <: Spec](
-          x: S#Atomic[Na, Cardinality.Singular, Int],
+          x: S#Atomic[NA, Cardinality.Singular, Int],
           y: S#Atomic[Int, Cardinality.Variable, Int]
         )
         val resp: Response[Double, E] =
           Double[ResponseSpec[E]](
-            x = HashMap(Na() -> Xor.right(CSet.Singular(10))),
+            x = HashMap(NA() -> Xor.right(CSet.Singular(10))),
             y = HashMap(
               1 -> Xor.right(CSet.Variable(List(1, 2, 3))),
               2 -> Xor.right(CSet.Variable(List(4, 5, 6)))
@@ -60,11 +60,11 @@ object ResponseEncodingTest extends TestSuite {
       'SingleNested {
         case class Inner[S <: Spec]()
         case class Outer[S <: Spec](
-          inner: S#Nested[Na, Cardinality.Singular, Inner]
+          inner: S#Nested[NA, Cardinality.Singular, Inner]
         )
         val respInner: Response[Inner, E] = Inner()
         val resp: Response[Outer, E] = Outer[ResponseSpec[E]](
-          inner = HashMap(Na() -> Xor.right(CSet.Singular(respInner)))
+          inner = HashMap(NA() -> Xor.right(CSet.Singular(respInner)))
         )
         resp.asJson.noSpaces ==> """{"inner":{"":{"Ok":{"Singular":{}}}}}"""
       }
@@ -80,13 +80,13 @@ object ResponseEncodingTest extends TestSuite {
       'HCons {
         val xWit = Witness('x)
         type K = xWit.T
-        type P = Na
+        type P = NA
         type C = Cardinality.Singular
         type A = Int
         type T = HNil
         type V = ResponseSpec[E]#Atomic[P, C, A]
         val tail: T = HNil
-        val value: V = HashMap(Na() -> Xor.right(CSet.Singular(10)))
+        val value: V = HashMap(NA() -> Xor.right(CSet.Singular(10)))
         val atomic: FieldType[K, V] :: T = field[K](value) :: tail
 
         oe(atomic) ==> """{"x":{"":{"Ok":{"Singular":10}}}}"""

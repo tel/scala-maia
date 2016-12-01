@@ -9,4 +9,4 @@ import jspha.comms._
 import scala.language.higherKinds
 
 trait ToWire[Api[_ <: Spec]]
-  extends (Request[Api] => wire.Request)
+  extends (Request[Api] => WireRequest)
