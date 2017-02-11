@@ -34,9 +34,21 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "utest" % uTestVersion % "test"
 )
 
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
+
 testFrameworks +=
   new TestFramework("utest.runner.Framework")
 
 wartremoverErrors ++= Warts.unsafe
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
+scalastyleSources in Test ++= (unmanagedSourceDirectories in Compile).value
+scalastyleSources in Test ++= (unmanagedSourceDirectories in Test).value
+scalastyleFailOnError := true
+
+// The following lines enable automatic ScalaStyle linting during tests
+lazy val testScalastyle = taskKey[Unit]("testScalastyle")
+testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle
+  .in(Test)
+  .toTask("")
+  .value
+(test in Test) := ((test in Test) dependsOn testScalastyle).value

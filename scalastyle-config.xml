@@ -1,0 +1,25 @@
+<scalastyle>
+ <name>Maia house-configuration</name>
+
+ <check level="warning" class="org.scalastyle.file.FileTabChecker" enabled="true"/>
+ <check level="warning" class="org.scalastyle.file.WhitespaceEndOfLineChecker" enabled="true"/>
+
+ <check level="warning" class="org.scalastyle.file.HeaderMatchesChecker" enabled="true">
+  <parameters>
+   <parameter name="header"><![CDATA[/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */]]></parameter>
+  </parameters>
+ </check>
+
+ <check level="warning" class="org.scalastyle.scalariform.EqualsHashCodeChecker" enabled="true"/>
+
+ <check level="warning" class="org.scalastyle.scalariform.ReturnChecker" enabled="true"/>
+ <check level="warning" class="org.scalastyle.scalariform.NullChecker" enabled="true"/>
+ <check level="warning" class="org.scalastyle.scalariform.NoCloneChecker" enabled="true"/>
+ <check level="warning" class="org.scalastyle.scalariform.NoFinalizeChecker" enabled="true"/>
+ <check level="warning" class="org.scalastyle.scalariform.CovariantEqualsChecker" enabled="true"/>
+ <check level="warning" class="org.scalastyle.scalariform.StructuralTypeChecker" enabled="true"/>
+
+ <check level="warning" class="org.scalastyle.scalariform.PublicMethodsHaveTypeChecker" enabled="true"/>
+</scalastyle>
