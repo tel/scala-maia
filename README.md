@@ -1,24 +1,22 @@
 
-# Comms
+# Maia
 
-[![Build Status](https://travis-ci.org/tel/scala-comms.svg?branch=master)](https://travis-ci.org/tel/scala-comms)
-
-*Typeful data fetching in Scala.js, a la GraphQL*
+*Highly-typeful data fetching in Scala.js, a la GraphQL*
 
 ## Welcome
 
-Comms is a Scala library for the JVM and Javascript platforms that 
+Maia is a Scala library for the JVM and Javascript platforms that
 enables application authors to share structured data between processes 
 using a well-typed query language. It shares similar goals with the 
 larger [GraphQL project](http://graphql.org/) but is optimized for the 
 Scala platform and ecosystem and offers more type-level guarantees to
 users for that restriction.
 
-## Usage
+## Etymology
 
-Comms is currently *pre-alpha* software and therefore doesn't even claim
-to work or be installable. There is no public distribution yet available 
-or release methodology.
+Maia is Greek for "midwife", but more directly it refers to the maieutic,
+or socratic, method---a didactic method of having a discussion through a
+series of questions and answers.
 
 ## License, generally
 
