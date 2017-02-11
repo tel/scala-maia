@@ -13,9 +13,9 @@ ecosystem and offers more type-level guarantees to users for that restriction.
 
 ## Etymology
 
-Maia is Greek for "midwife", but more directly it refers to the maieutic, or
-socratic, method---a didactic method of having a discussion through a series of
-questions and answers.
+Maia is Greek for "midwife" and name of the eldest of the Pleiades, but more
+directly it refers to the maieutic, or socratic, method---a didactic method of
+having a discussion through a series of questions and answers.
 
 ## Contributing
 
