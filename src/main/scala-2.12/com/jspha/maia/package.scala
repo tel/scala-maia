@@ -11,6 +11,6 @@ package object maia {
   type Request[A[_ <: Mode]] = A[modes.RequestMode.type]
   type Response[A[_ <: Mode]] = A[modes.ResponseMode.type]
   type Query[A[_ <: Mode]] = A[modes.QueryMode[A]]
-  type Interpreter[M, A[_ <: Mode]] = A[modes.InterpreterMode[M]]
+  type Interpreter[M[_], A[_ <: Mode]] = A[modes.InterpreterMode[M]]
 
 }

@@ -5,10 +5,9 @@
 package com.jspha.maia.modes
 
 import scala.language.higherKinds
-import jspha.maia.simple._
+import com.jspha.maia._
 
 object RequestMode extends Mode {
   type Atom[A] = Boolean
   type Obj[A[_ <: Mode]] = Option[Request[A]]
 }
-

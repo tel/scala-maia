@@ -18,7 +18,7 @@ object Response {
   def atom(value: String): Response =
     Atom(value)
   def obj(elems: (String, Response)*): Response =
-    Obj(HashMap(elems:_*))
+    Obj(HashMap(elems: _*))
 
   implicit val ResponseDecoder: Decoder[Response] = deriveDecoder[Response]
   implicit val ResponseEncoder: Encoder[Response] = deriveEncoder[Response]

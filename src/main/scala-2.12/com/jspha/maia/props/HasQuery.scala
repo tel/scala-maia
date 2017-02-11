@@ -5,9 +5,8 @@
 package com.jspha.maia.props
 
 import scala.language.higherKinds
-import jspha.maia.simple._
+import com.jspha.maia._
 
 trait HasQuery[A[_ <: Mode]] {
   val query: Query[A]
 }
-

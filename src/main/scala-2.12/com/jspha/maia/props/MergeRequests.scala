@@ -5,7 +5,7 @@
 package com.jspha.maia.props
 
 import scala.language.higherKinds
-import jspha.maia.simple._
+import com.jspha.maia._
 
 // TODO: Implement this computation via implicits
 trait MergeRequests[Api[_ <: Mode]] {

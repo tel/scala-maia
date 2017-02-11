@@ -7,7 +7,7 @@ package com.jspha.maia
 import scala.language.higherKinds
 
 abstract class Server[M[_], Api[_ <: Mode]](interpreter: Interpreter[M, Api])
-  extends Handler[M, Api]
+    extends Handler[M, Api]
 
 /*
 

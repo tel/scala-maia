@@ -4,12 +4,9 @@
 
 package com.jspha.maia.props
 
-import com.jspha.maia.modes.RequestMode
-import jspha.maia.modes.RequestMode
-
 import scala.language.higherKinds
-import jspha.maia.simple._
-import jspha.maia.simple.modes.RequestMode
+import com.jspha.maia._
+import com.jspha.maia.modes.RequestMode
 import shapeless._
 
 trait UnitRequest[Api[_ <: Mode]] {
@@ -36,14 +33,14 @@ object UnitRequest {
       def unit: HNil = HNil
     }
 
-    implicit def WorkerRecurAtom[K <: Symbol, Api[_ <: Mode], A, T <: HList](
+    implicit def WorkerRecurAtom[K <: Symbol, A, T <: HList](
       implicit recur: Worker[T]
     ): Worker[RequestMode.Atom[A] :: T] =
       new Worker[RequestMode.Atom[A] :: T] {
         val unit: RequestMode.Atom[A] :: T = false :: recur.unit
       }
 
-    implicit def WorkerRecurObj[K <: Symbol, Api[_ <: Mode], A, T <: HList](
+    implicit def WorkerRecurObj[K <: Symbol, A[_ <: Mode], T <: HList](
       implicit recur: Worker[T]
     ): Worker[RequestMode.Obj[A] :: T] =
       new Worker[RequestMode.Obj[A] :: T] {

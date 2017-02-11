@@ -37,8 +37,6 @@ object ExampleTests extends TestSuite {
     api
   }
 
-  val tests = this {
-
-  }
+  val tests = this {}
 
 }

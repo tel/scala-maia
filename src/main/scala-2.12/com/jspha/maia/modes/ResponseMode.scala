@@ -4,14 +4,10 @@
 
 package com.jspha.maia.modes
 
-import com.jspha.maia.Mode
-import jspha.maia.Mode
-
 import scala.language.higherKinds
-import jspha.maia.simple._
+import com.jspha.maia._
 
 object ResponseMode extends Mode {
   type Atom[A] = Option[A]
   type Obj[A[_ <: Mode]] = Option[Response[A]]
 }
-

@@ -4,11 +4,8 @@
 
 package com.jspha.maia.modes
 
-import com.jspha.maia.{Fetch, Mode}
-import jspha.maia.{Fetch, Mode}
-
 import scala.language.higherKinds
-import jspha.maia.simple._
+import com.jspha.maia._
 
 class QueryMode[Super[_ <: Mode]] extends Mode {
   case class Atom[A](

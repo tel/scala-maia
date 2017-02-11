@@ -23,7 +23,7 @@ object Request {
   val atom: Request =
     Atom
   def obj(elems: (String, Request)*): Request =
-    Obj(HashMap(elems:_*))
+    Obj(HashMap(elems: _*))
 
   implicit val RequestDecoder: Decoder[Request] = deriveDecoder[Request]
   implicit val RequestEncoder: Encoder[Request] = deriveEncoder[Request]

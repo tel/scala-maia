@@ -5,7 +5,7 @@
 package com.jspha.maia.modes
 
 import scala.language.higherKinds
-import jspha.maia.simple._
+import com.jspha.maia._
 
 class InterpreterMode[M[_]] extends Mode {
   type Atom[A] = M[A]
