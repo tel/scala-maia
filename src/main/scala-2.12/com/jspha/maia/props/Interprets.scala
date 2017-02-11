@@ -8,7 +8,6 @@ import scala.language.higherKinds
 import shapeless._
 import cats._
 import com.jspha.maia._
-import com.jspha.maia.modes._
 
 trait Interprets[M[_], Api[_ <: Mode]] {
   def apply(i: Fetcher[M, Api], r: Request[Api]): M[Response[Api]]
@@ -45,7 +44,7 @@ object Interprets {
                                  TResp <: HList](
       implicit rWorker: Worker[M, TI, TReq, TResp]
     ): Worker[M,
-              InterpreterMode[M]#Atom[A] :: TI,
+              FetcherMode[M]#Atom[A] :: TI,
               RequestMode.Atom[A] :: TReq,
               ResponseMode.Atom[A] :: TResp] = {
       (ii: M[A] :: TI, rr: Boolean :: TReq) =>
@@ -71,7 +70,7 @@ object Interprets {
       implicit rWorker: Worker[M, TI, TReq, TResp],
       rObj: Interprets[M, A]
     ): Worker[M,
-              InterpreterMode[M]#Obj[A] :: TI,
+              FetcherMode[M]#Obj[A] :: TI,
               RequestMode.Obj[A] :: TReq,
               ResponseMode.Obj[A] :: TResp] = {
       (ii: M[Fetcher[M, A]] :: TI, rr: Option[Request[A]] :: TReq) =>

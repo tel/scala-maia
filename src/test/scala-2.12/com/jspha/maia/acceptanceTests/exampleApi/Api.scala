@@ -4,8 +4,22 @@
 
 package com.jspha.maia.acceptanceTests.exampleApi
 
-import com.jspha.maia.Mode
+import com.jspha.maia.{FetcherMode, _}
+import fs2.Task
 
-case class Api[M <: Mode](
+final case class Api[M <: Mode](
   getUser: M#Obj[User]
 )
+
+object Api {
+
+  type Fm = FetcherMode[Task]
+
+  val fetcher: Fetcher[Task, Api] =
+    Api[Fm](
+      getUser = Task.now {
+        User.fetchCurrent
+      }
+    )
+
+}

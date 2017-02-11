@@ -23,6 +23,7 @@ resolvers += Resolver.sonatypeRepo("releases")
 val catsVersion = "0.9.0"
 val circeVersion = "0.7.0"
 val shapelessVersion = "2.3.2"
+
 val uTestVersion = "0.4.5"
 
 libraryDependencies ++= Seq(
@@ -30,8 +31,13 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
   "org.typelevel" %% "cats" % catsVersion,
-  "com.chuusai" %% "shapeless" % shapelessVersion,
-  "com.lihaoyi" %% "utest" % uTestVersion % "test"
+  "com.chuusai" %% "shapeless" % shapelessVersion
+)
+
+libraryDependencies ++= Seq(
+  "com.lihaoyi" %% "utest" % uTestVersion % "test",
+  "co.fs2" %% "fs2-core" % "0.9.2" % "test",
+  "co.fs2" %% "fs2-cats" % "0.3.0"
 )
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
@@ -39,7 +45,11 @@ addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 testFrameworks +=
   new TestFramework("utest.runner.Framework")
 
-wartremoverErrors ++= Warts.unsafe
+wartremoverErrors ++= Warts.allBut(
+  Wart.AsInstanceOf,
+  Wart.ExplicitImplicitTypes,
+  Wart.Nothing
+)
 
 scalastyleSources in Test ++= (unmanagedSourceDirectories in Compile).value
 scalastyleSources in Test ++= (unmanagedSourceDirectories in Test).value

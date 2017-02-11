@@ -4,9 +4,30 @@
 
 package com.jspha.maia.acceptanceTests.exampleApi
 
-import com.jspha.maia.Mode
+import com.jspha.maia._
+import fs2.Task
+import fs2.interop.cats._
 
-case class City[M <: Mode](
+final case class City[M <: Mode](
   name: M#Atom[String],
   location: M#Obj[Location]
 )
+
+object City {
+
+  type Fm = FetcherMode[Task]
+
+  def fetchByName(name: String): Fetcher[Task, City] =
+    name match {
+      case "Atlanta" =>
+        City[Fm](
+          name = Task.now(name),
+          location = Task.now {
+            Fetcher.ofConst(
+              Location[ConstantMode](latitude = 0.0, longitude = 0.0)
+            )
+          }
+        )
+    }
+
+}

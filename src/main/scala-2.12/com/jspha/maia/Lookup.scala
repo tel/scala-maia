@@ -7,7 +7,7 @@ package com.jspha.maia
 import scala.language.higherKinds
 import cats._
 
-case class Lookup[Api[_ <: Mode], R](
+final case class Lookup[Api[_ <: Mode], R](
   print: Request[Api],
   parse: Response[Api] => R
 )
@@ -25,7 +25,7 @@ object Lookup {
         )
 
       def map[A, B](fa: Lookup[Api, A])(f: A => B): Lookup[Api, B] =
-        fa.copy(parse = fa.parse andThen f)
+        fa.copy(parse = (resp) => f(fa.parse(resp)))
     }
 
 }

@@ -2,10 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package com.jspha.maia.modes
+package com.jspha.maia
 
 import scala.language.higherKinds
-import com.jspha.maia._
 
 class QueryMode[Super[_ <: Mode]] extends Mode {
   case class Atom[A](

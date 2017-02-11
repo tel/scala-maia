@@ -10,8 +10,8 @@ import io.circe._, io.circe.generic.semiauto._
 sealed trait Response
 object Response {
   case object Unit extends Response
-  case class Atom(value: String) extends Response
-  case class Obj(mapping: HashMap[String, Response]) extends Response
+  final case class Atom(value: String) extends Response
+  final case class Obj(mapping: HashMap[String, Response]) extends Response
 
   val unit: Response =
     Unit
@@ -20,11 +20,6 @@ object Response {
   def obj(elems: (String, Response)*): Response =
     Obj(HashMap(elems: _*))
 
-  // NOTE: Circe uses asInstanceOf in its macros. This is an acceptable risk.
-
-  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val ResponseDecoder: Decoder[Response] = deriveDecoder[Response]
-
-  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val ResponseEncoder: Encoder[Response] = deriveEncoder[Response]
 }

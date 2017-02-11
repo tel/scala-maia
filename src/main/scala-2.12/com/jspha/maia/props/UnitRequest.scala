@@ -6,7 +6,6 @@ package com.jspha.maia.props
 
 import scala.language.higherKinds
 import com.jspha.maia._
-import com.jspha.maia.modes.RequestMode
 import shapeless._
 
 trait UnitRequest[Api[_ <: Mode]] {

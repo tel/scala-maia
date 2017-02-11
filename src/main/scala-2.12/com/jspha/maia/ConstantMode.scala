@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package com.jspha.maia.acceptanceTests.exampleApi
+package com.jspha.maia
 
-import com.jspha.maia.Mode
+import scala.language.higherKinds
 
-final case class Location[M <: Mode](
-  latitude: M#Atom[Double],
-  longitude: M#Atom[Double]
-)
+object ConstantMode extends Mode {
+  type Atom[A] = A
+  type Obj[Api[_ <: Mode]] = Constant[Api]
+}

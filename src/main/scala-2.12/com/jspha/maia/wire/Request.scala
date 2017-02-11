@@ -16,7 +16,7 @@ sealed trait Request {
 object Request {
   case object Unit extends Request
   case object Atom extends Request
-  case class Obj(mapping: HashMap[String, Request]) extends Request
+  final case class Obj(mapping: HashMap[String, Request]) extends Request
 
   val unit: Request =
     Unit
@@ -25,12 +25,7 @@ object Request {
   def obj(elems: (String, Request)*): Request =
     Obj(HashMap(elems: _*))
 
-  // NOTE: Circe uses asInstanceOf in its macros. This is an acceptable risk.
-
-  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val RequestDecoder: Decoder[Request] = deriveDecoder[Request]
-
-  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val RequestEncoder: Encoder[Request] = deriveEncoder[Request]
 
 }
