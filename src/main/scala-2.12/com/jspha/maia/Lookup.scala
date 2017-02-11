@@ -7,24 +7,24 @@ package com.jspha.maia
 import scala.language.higherKinds
 import cats._
 
-case class Fetch[Api[_ <: Mode], R](
+case class Lookup[Api[_ <: Mode], R](
   print: Request[Api],
   parse: Response[Api] => R
 )
 
-object Fetch {
+object Lookup {
 
-  implicit def FetchIsApply[Api[_ <: Mode]](
+  implicit def LookupIsApply[Api[_ <: Mode]](
     implicit merger: props.MergeRequests[Api]
-  ): Apply[Fetch[Api, ?]] =
-    new Apply[Fetch[Api, ?]] {
-      def ap[A, B](ff: Fetch[Api, A => B])(fa: Fetch[Api, A]) =
-        Fetch[Api, B](
+  ): Apply[Lookup[Api, ?]] =
+    new Apply[Lookup[Api, ?]] {
+      def ap[A, B](ff: Lookup[Api, A => B])(fa: Lookup[Api, A]) =
+        Lookup[Api, B](
           print = merger.merge(ff.print, fa.print),
           parse = resp => ff.parse(resp)(fa.parse(resp))
         )
 
-      def map[A, B](fa: Fetch[Api, A])(f: A => B): Fetch[Api, B] =
+      def map[A, B](fa: Lookup[Api, A])(f: A => B): Lookup[Api, B] =
         fa.copy(parse = fa.parse andThen f)
     }
 

@@ -16,5 +16,5 @@ import scala.language.higherKinds
  */
 
 trait Handler[M[_], Api[_ <: Mode]] {
-  def run(request: Request[Api]): M[Response[Api]]
+  def apply(request: Request[Api]): M[Response[Api]]
 }

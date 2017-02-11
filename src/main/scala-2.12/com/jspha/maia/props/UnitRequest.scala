@@ -10,7 +10,7 @@ import com.jspha.maia.modes.RequestMode
 import shapeless._
 
 trait UnitRequest[Api[_ <: Mode]] {
-  def unit: Request[Api]
+  val unit: Request[Api]
 }
 
 object UnitRequest {
@@ -20,17 +20,17 @@ object UnitRequest {
     worker: Worker[Repr]
   ): UnitRequest[Api] =
     new UnitRequest[Api] {
-      def unit: Request[Api] = gen.from(worker.unit)
+      val unit: Request[Api] = gen.from(worker.unit)
     }
 
   trait Worker[T <: HList] {
-    def unit: T
+    val unit: T
   }
 
   object Worker {
 
     implicit val WorkerHNil: Worker[HNil] = new Worker[HNil] {
-      def unit: HNil = HNil
+      val unit: HNil = HNil
     }
 
     implicit def WorkerRecurAtom[K <: Symbol, A, T <: HList](

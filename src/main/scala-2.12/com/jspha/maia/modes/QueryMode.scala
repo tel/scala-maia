@@ -12,8 +12,8 @@ class QueryMode[Super[_ <: Mode]] extends Mode {
     request: Request[Super],
     response: Response[Super] => A
   ) {
-    def get: Fetch[Super, A] =
-      Fetch[Super, A](request, response)
+    def get: Lookup[Super, A] =
+      Lookup[Super, A](request, response)
   }
 
   case class Obj[Sub[_ <: Mode]](
@@ -21,9 +21,9 @@ class QueryMode[Super[_ <: Mode]] extends Mode {
     response: Response[Super] => Response[Sub],
     sub: Query[Sub]
   ) {
-    def get[R](cont: Query[Sub] => Fetch[Sub, R]): Fetch[Super, R] = {
+    def get[R](cont: Query[Sub] => Lookup[Sub, R]): Lookup[Super, R] = {
       val subLok = cont(sub)
-      Fetch[Super, R](
+      Lookup[Super, R](
         request(subLok.print),
         response andThen subLok.parse
       )

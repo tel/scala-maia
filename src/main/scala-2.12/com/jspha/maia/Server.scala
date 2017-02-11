@@ -6,16 +6,11 @@ package com.jspha.maia
 
 import scala.language.higherKinds
 
-abstract class Server[M[_], Api[_ <: Mode]](interpreter: Interpreter[M, Api])
-    extends Handler[M, Api]
+class Server[M[_], Api[_ <: Mode]](interpreter: Fetcher[M, Api])(
+  implicit interprets: props.Interprets[M, Api]
+) extends Handler[M, Api] {
 
-/*
+  def apply(request: Request[Api]): M[Response[Api]] =
+    interprets(interpreter, request)
 
-  TODO: Implement the Server.
-
-  For each "requested" field in the Api, we pass the request through the
-  given Interpreter, flattening each field request's M layer monadically. At
-  the leaves, we'll obtain result values which we can reassemble into a
-  response.
-
- */
+}

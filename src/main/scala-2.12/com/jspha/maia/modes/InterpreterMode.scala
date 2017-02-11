@@ -9,5 +9,5 @@ import com.jspha.maia._
 
 class InterpreterMode[M[_]] extends Mode {
   type Atom[A] = M[A]
-  type Obj[Api[_ <: Mode]] = M[Interpreter[M, Api]]
+  type Obj[Api[_ <: Mode]] = M[Fetcher[M, Api]]
 }
