@@ -20,6 +20,11 @@ object Response {
   def obj(elems: (String, Response)*): Response =
     Obj(HashMap(elems: _*))
 
+  // NOTE: Circe uses asInstanceOf in its macros. This is an acceptable risk.
+
+  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val ResponseDecoder: Decoder[Response] = deriveDecoder[Response]
+
+  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val ResponseEncoder: Encoder[Response] = deriveEncoder[Response]
 }

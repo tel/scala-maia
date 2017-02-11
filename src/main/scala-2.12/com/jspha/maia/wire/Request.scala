@@ -25,7 +25,12 @@ object Request {
   def obj(elems: (String, Request)*): Request =
     Obj(HashMap(elems: _*))
 
+  // NOTE: Circe uses asInstanceOf in its macros. This is an acceptable risk.
+
+  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val RequestDecoder: Decoder[Request] = deriveDecoder[Request]
+
+  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   implicit val RequestEncoder: Encoder[Request] = deriveEncoder[Request]
 
 }

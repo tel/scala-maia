@@ -14,7 +14,8 @@ scalacOptions ++= Seq(
   // Typelevel flags...
   "-Yinduction-heuristics",
   "-Xlint:strict-unsealed-patmat",
-  "-Xexperimental")
+  "-Xexperimental"
+)
 licenses := Seq("MPLv2" -> url("http://mozilla.org/MPL/2.0/"))
 homepage := Some(url("http://github.com/tel/scala-maia"))
 resolvers += Resolver.sonatypeRepo("releases")
@@ -35,5 +36,7 @@ libraryDependencies ++= Seq(
 
 testFrameworks +=
   new TestFramework("utest.runner.Framework")
+
+wartremoverErrors ++= Warts.unsafe
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
