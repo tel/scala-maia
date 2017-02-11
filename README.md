@@ -1,5 +1,5 @@
 
-# ![Maia logo](../master/docs/logos/maia-40x40.png?raw=true) Maia
+# ![Maia logo](../master/docs/logos/maia-63x40.png?raw=true) Maia
 
 *Highly-typeful data fetching in Scala.js, a la GraphQL*
 
