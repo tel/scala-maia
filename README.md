@@ -1,5 +1,5 @@
 
-# Maia <img src="../master/docs/logos/maia.png?raw=true" width="75" height="40">
+# Maia <img src="../master/docs/logos/maia.png?raw=true" height="35">
 
 *Highly-typeful data fetching in Scala.js, a la GraphQL*
 
