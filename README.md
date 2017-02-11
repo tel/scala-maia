@@ -1,5 +1,5 @@
 
-# Maia ![Maia logo](../master/docs/logos/maia-75x40.png?raw=true)
+# Maia <img src="../master/docs/logos/maia.png?raw=true" width="75" height="40">
 
 *Highly-typeful data fetching in Scala.js, a la GraphQL*
 
