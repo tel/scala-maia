@@ -14,7 +14,7 @@ case class Fetch[Api[_ <: Mode], R](
 
 object Fetch {
 
-  implicit def LookupIsApply[Api[_ <: Mode]](
+  implicit def FetchIsApply[Api[_ <: Mode]](
     implicit merger: props.MergeRequests[Api]
   ): Apply[Fetch[Api, ?]] =
     new Apply[Fetch[Api, ?]] {
