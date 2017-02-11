@@ -3,6 +3,9 @@
 
 *Highly-typeful data fetching in Scala.js, a la GraphQL*
 
+[![Build
+Status](https://travis-ci.org/tel/scala-maia.svg?branch=master)](https://travis-ci.org/tel/scala-maia)
+
 ## Welcome
 
 Maia is a Scala library for the JVM and Javascript platforms that enables
