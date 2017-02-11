@@ -5,6 +5,7 @@
 package com.jspha.maia
 
 import utest._
+import utest.framework.{Test, Tree}
 
 object ExampleTests extends TestSuite {
 
@@ -16,27 +17,6 @@ object ExampleTests extends TestSuite {
     getUser: S#Obj[User]
   )
 
-  val query: Query[Api] =
-    implicitly[props.HasQuery[Api]].query
-
-  val apiReq1: Request[Api] =
-    Api[modes.RequestMode.type](None)
-
-  val apiReq2: Request[Api] = {
-    val user = User[modes.RequestMode.type](name = true)
-    val api = Api[modes.RequestMode.type](getUser = Some(user))
-    api
-  }
-
-  val apiResp1: Response[Api] =
-    Api[modes.ResponseMode.type](None)
-
-  val apiResp2: Response[Api] = {
-    val user = User[modes.ResponseMode.type](name = Some("Joseph Abrahamson"))
-    val api = Api[modes.ResponseMode.type](getUser = Some(user))
-    api
-  }
-
-  val tests = this {}
+  val tests: Tree[Test] = this {}
 
 }
