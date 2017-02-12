@@ -40,7 +40,7 @@ necessary for operating atop your API.
 
 A simple example API follows:
 
-```
+```scala
 final case class Person[M <: Mode](
   name: M#Atom[String],
   city: M#Obj[City]
