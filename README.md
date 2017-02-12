@@ -34,6 +34,8 @@ implementation of the Maia API_ and therefore value judgements can be made by
 the maintainers as to whether a patch is moving in a valuable direction at this
 time.
 
+Current direction on work is organized via [a Github project](../../projects/1).
+
 ### Patch guidelines
 
 - Patches must pass continuous integration on the Travis CI instance associated
