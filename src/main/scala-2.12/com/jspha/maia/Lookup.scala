@@ -20,7 +20,7 @@ object Lookup {
     new Apply[Lookup[Api, ?]] {
       def ap[A, B](ff: Lookup[Api, A => B])(fa: Lookup[Api, A]) =
         Lookup[Api, B](
-          print = merger.merge(ff.print, fa.print),
+          print = merger.apply(ff.print, fa.print),
           parse = resp => ff.parse(resp)(fa.parse(resp))
         )
 

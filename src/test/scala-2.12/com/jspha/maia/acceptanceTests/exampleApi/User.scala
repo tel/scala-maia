@@ -4,7 +4,7 @@
 
 package com.jspha.maia.acceptanceTests.exampleApi
 
-import com.jspha.maia.{FetcherMode, _}
+import com.jspha.maia._
 import fs2.Task
 import fs2.interop.cats._
 
@@ -29,6 +29,68 @@ object User {
           Location[ConstantMode](latitude = 0.0, longitude = 0.0)
         )
       }
+    )
+
+  private val qm = new QueryMode[User]
+
+  val q: Query[User] =
+    User[QueryMode[User]](
+      name = qm.Atom(
+        User[RequestMode](
+          name = true,
+          age = false,
+          hometown = None,
+          lastKnownLocation = None
+        ),
+        // TODO: This bare get indicates the need for error handling!
+        res =>
+          res.name match {
+            case Some(v) => v
+        }
+      ),
+      age = qm.Atom(
+        User[RequestMode](
+          name = false,
+          age = true,
+          hometown = None,
+          lastKnownLocation = None
+        ),
+        // TODO: This bare get indicates the need for error handling!
+        res =>
+          res.age match {
+            case Some(v) => v
+        }
+      ),
+      hometown = qm.Obj[City](
+        req =>
+          User[RequestMode](
+            name = false,
+            age = false,
+            hometown = Some(req),
+            lastKnownLocation = None
+        ),
+        // TODO: This bare get indicates the need for error handling!
+        resp =>
+          resp.hometown match {
+            case Some(r) => r
+        },
+        City.q
+      ),
+      lastKnownLocation = qm.Obj[Location](
+        req =>
+          User[RequestMode](
+            name = false,
+            age = false,
+            hometown = None,
+            lastKnownLocation = Some(req)
+        ),
+        // TODO: This bare get indicates the need for error handling!
+        resp =>
+          resp.lastKnownLocation match {
+            case Some(r) => r
+        },
+        Location.q
+      )
     )
 
 }

@@ -46,6 +46,7 @@ testFrameworks +=
   new TestFramework("utest.runner.Framework")
 
 wartremoverErrors ++= Warts.allBut(
+  Wart.Any,
   Wart.AsInstanceOf,
   Wart.ExplicitImplicitTypes,
   Wart.Nothing

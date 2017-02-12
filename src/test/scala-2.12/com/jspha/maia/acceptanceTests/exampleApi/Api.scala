@@ -4,7 +4,7 @@
 
 package com.jspha.maia.acceptanceTests.exampleApi
 
-import com.jspha.maia.{FetcherMode, _}
+import com.jspha.maia._
 import fs2.Task
 
 final case class Api[M <: Mode](
@@ -22,4 +22,21 @@ object Api {
       }
     )
 
+  private val qm = new QueryMode[Api]
+
+  val q: Query[Api] =
+    Api[QueryMode[Api]](
+      getUser = qm.Obj[User](
+        req =>
+          Api[RequestMode](
+            getUser = Some(req)
+        ),
+        // TODO: This bare get indicates the need for error handling!
+        resp =>
+          resp.getUser match {
+            case Some(r) => r
+        },
+        User.q
+      )
+    )
 }

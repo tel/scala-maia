@@ -30,4 +30,34 @@ object City {
         )
     }
 
+  private val qm = new QueryMode[City]
+
+  val q: Query[City] =
+    City[QueryMode[City]](
+      name = qm.Atom(
+        City[RequestMode](
+          name = true,
+          location = None
+        ),
+        // TODO: This bare get indicates the need for error handling!
+        res =>
+          res.name match {
+            case Some(v) => v
+        }
+      ),
+      location = qm.Obj[Location](
+        req =>
+          City[RequestMode](
+            name = false,
+            location = Some(req)
+        ),
+        // TODO: This bare get indicates the need for error handling!
+        resp =>
+          resp.location match {
+            case Some(r) => r
+        },
+        Location.q
+      )
+    )
+
 }
