@@ -14,6 +14,9 @@ well-typed query language. It shares similar goals with the larger [GraphQL
 project](http://graphql.org/) but is optimized for the Scala platform and
 ecosystem and offers more type-level guarantees to users for that restriction.
 
+See [Architecture](../master/docs/architecture.md) for an overview of Maia's
+design and implementation.
+
 ## Etymology
 
 Maia is Greek for "midwife" and name of the eldest of the Pleiades, but more
