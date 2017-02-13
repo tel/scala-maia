@@ -17,6 +17,13 @@ ecosystem and offers more type-level guarantees to users for that restriction.
 See [Architecture](../master/docs/architecture.md) for an overview of Maia's
 design and implementation.
 
+## Important note
+
+*Co-maintainers desired!* In order to move toward a C4-like contribution model,
+I need co-maintainers so that I can shed the power of merging my own code. It's
+not quite yet time to do this, but soon. If you're interested in GraphQL, Scala,
+and type-level programming (e.g. Shapeless) [contact me](mailto:me@jspha.com).
+
 ## Etymology
 
 Maia is Greek for "midwife" and name of the eldest of the Pleiades, but more
