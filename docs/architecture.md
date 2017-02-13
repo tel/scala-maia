@@ -57,6 +57,39 @@ fields at types defined by the `Mode`, `M`. `Person` and `City` reference one
 another in a loop and, depending on the semantics of the API you're offering,
 either one could be the "top-level" of your API.
 
+### Example `Modes`
+
+`Mode` parameterization is the key to making Maia work. It lets a single type
+definition be used in multiple locations while ensuring alignment between
+different parts of the flow.
+
+The most basic `Mode` is `ConstantMode`:
+
+```scala
+object ConstantMode extends Mode {
+  type Atom[A] = A
+  type Obj[Api[_ <: Mode]] = Constant[Api]
+}
+```
+
+It's simple because it just defines `Atom`s to be themselves and `Obj`s to be
+themselves in `Constant` mode as well---in other words, `Constant[City]` behaves
+just like a normal Scala `case class`.
+
+```scala
+lazy val boston: Constant[City] = 
+  City[ConstantMode](
+    name = "Boston",
+    mayor = marty
+  )
+
+lazy val marty: Constant[Person] =
+  Person[ConstantMode](
+    name = "Marty Walsh",
+    city = boston
+  )
+```
+
 ### API mode synonyms
 
 Instead of writing `City[RequestMode]` all over the place, Maia defines a type
