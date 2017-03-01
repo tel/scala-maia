@@ -4,6 +4,7 @@
 
 package com.jspha.maia.acceptanceTests.exampleApi
 
+import cats.data.Validated
 import com.jspha.maia._
 import fs2.Task
 import fs2.interop.cats._
@@ -23,7 +24,7 @@ object User {
     User[Fm](
       name = Task.now("Joseph Abrahamson"),
       age = Task.now(29),
-      hometown = Task.now(City.fetchByName("Atlanta")),
+      hometown = Task.now(City.atlanta),
       lastKnownLocation = Task.now {
         Fetcher.ofConst(
           Location[ConstantMode](latitude = 0.0, longitude = 0.0)
@@ -36,32 +37,35 @@ object User {
   val q: Query[User] =
     User[QueryMode[User]](
       name = qm.Atom(
+        "name",
         User[RequestMode](
           name = true,
           age = false,
           hometown = None,
           lastKnownLocation = None
         ),
-        // TODO: This bare get indicates the need for error handling!
-        res =>
-          res.name match {
-            case Some(v) => v
-        }
+        resp =>
+          Validated.fromOption(
+            resp.name,
+            LookupError.ResponseMissingCRITICAL("name")
+        )
       ),
       age = qm.Atom(
+        "age",
         User[RequestMode](
           name = false,
           age = true,
           hometown = None,
           lastKnownLocation = None
         ),
-        // TODO: This bare get indicates the need for error handling!
-        res =>
-          res.age match {
-            case Some(v) => v
-        }
+        resp =>
+          Validated.fromOption(
+            resp.age,
+            LookupError.ResponseMissingCRITICAL("age")
+        )
       ),
       hometown = qm.Obj[City](
+        "hometown",
         req =>
           User[RequestMode](
             name = false,
@@ -69,14 +73,15 @@ object User {
             hometown = Some(req),
             lastKnownLocation = None
         ),
-        // TODO: This bare get indicates the need for error handling!
         resp =>
-          resp.hometown match {
-            case Some(r) => r
-        },
+          Validated.fromOption(
+            resp.hometown,
+            LookupError.ResponseMissingCRITICAL("hometown")
+        ),
         City.q
       ),
       lastKnownLocation = qm.Obj[Location](
+        "lastKnownLocation",
         req =>
           User[RequestMode](
             name = false,
@@ -84,11 +89,11 @@ object User {
             hometown = None,
             lastKnownLocation = Some(req)
         ),
-        // TODO: This bare get indicates the need for error handling!
         resp =>
-          resp.lastKnownLocation match {
-            case Some(r) => r
-        },
+          Validated.fromOption(
+            resp.lastKnownLocation,
+            LookupError.ResponseMissingCRITICAL("lastKnownLocation")
+        ),
         Location.q
       )
     )

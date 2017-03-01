@@ -4,6 +4,7 @@
 
 package com.jspha.maia.acceptanceTests.exampleApi
 
+import cats.data.Validated
 import com.jspha.maia._
 import fs2.Task
 import fs2.interop.cats._
@@ -17,45 +18,47 @@ object City {
 
   type Fm = FetcherMode[Task]
 
-  def fetchByName(name: String): Fetcher[Task, City] =
-    name match {
-      case "Atlanta" =>
-        City[Fm](
-          name = Task.now(name),
-          location = Task.now {
-            Fetcher.ofConst(
-              Location[ConstantMode](latitude = 0.0, longitude = 0.0)
-            )
-          }
+  def atlanta: Fetcher[Task, City] =
+    City[Fm](
+      name = Task.now("Atlanta"),
+      location = Task.now {
+        Fetcher.ofConst(
+          Location[ConstantMode](
+            latitude = 33.7490,
+            longitude = 84.3880
+          )
         )
-    }
+      }
+    )
 
   private val qm = new QueryMode[City]
 
   val q: Query[City] =
     City[QueryMode[City]](
       name = qm.Atom(
+        "name",
         City[RequestMode](
           name = true,
           location = None
         ),
-        // TODO: This bare get indicates the need for error handling!
-        res =>
-          res.name match {
-            case Some(v) => v
-        }
+        resp =>
+          Validated.fromOption(
+            resp.name,
+            LookupError.ResponseMissingCRITICAL("name")
+        )
       ),
       location = qm.Obj[Location](
+        "location",
         req =>
           City[RequestMode](
             name = false,
             location = Some(req)
         ),
-        // TODO: This bare get indicates the need for error handling!
         resp =>
-          resp.location match {
-            case Some(r) => r
-        },
+          Validated.fromOption(
+            resp.location,
+            LookupError.ResponseMissingCRITICAL("location")
+        ),
         Location.q
       )
     )

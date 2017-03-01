@@ -10,10 +10,6 @@ import com.jspha.maia.acceptanceTests.exampleApi.{Api, User}
 
 object ApiLookups {
 
-  val o1: Option[Int] = Some(3)
-  val o2: Option[Int] = Some(3)
-  val oo: Option[(Int, Int)] = (o1 |@| o2).tupled
-
   val lkUserName: Lookup[Api, String] =
     Api.q.getUser.get { user =>
       user.name.get

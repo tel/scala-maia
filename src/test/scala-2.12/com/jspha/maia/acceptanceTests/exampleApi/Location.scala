@@ -4,6 +4,7 @@
 
 package com.jspha.maia.acceptanceTests.exampleApi
 
+import cats.data.Validated
 import com.jspha.maia._
 
 final case class Location[M <: Mode](
@@ -14,31 +15,32 @@ final case class Location[M <: Mode](
 object Location {
 
   private val qm = new QueryMode[Location]
+
   val q: Query[Location] =
     Location[QueryMode[Location]](
       latitude = qm.Atom(
+        "latitude",
         Location[RequestMode](
           latitude = true,
           longitude = false
         ),
-        // TODO: This bare get indicates the need for error handling!
-        // Responses always include the potential for missing data---not only
-        // could the library be in error, it could also be a server refusal!
-        res =>
-          res.latitude match {
-            case Some(v) => v
-        }
+        resp =>
+          Validated.fromOption(
+            resp.latitude,
+            LookupError.ResponseMissingCRITICAL("latitude")
+        )
       ),
       longitude = qm.Atom(
+        "longitude",
         Location[RequestMode](
           latitude = false,
           longitude = true
         ),
-        // TODO: This bare get indicates the need for error handling! (above)
-        res =>
-          res.longitude match {
-            case Some(v) => v
-        }
+        resp =>
+          Validated.fromOption(
+            resp.longitude,
+            LookupError.ResponseMissingCRITICAL("longitude")
+        )
       )
     )
 

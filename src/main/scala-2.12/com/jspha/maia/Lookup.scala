@@ -6,13 +6,25 @@ package com.jspha.maia
 
 import scala.language.higherKinds
 import cats._
+import cats.data.Validated
 
 final case class Lookup[Api[_ <: Mode], R](
-  print: Request[Api],
-  parse: Response[Api] => R
-)
+  buildRequest: Request[Api],
+  analyzeResponse: Response[Api] => Validated[LookupError, R]
+) {
+
+  def handle: Lookup[Api, Validated[LookupError, R]] =
+    Lookup[Api, Validated[LookupError, R]](
+      buildRequest,
+      analyzeResponse = analyzeResponse andThen Validated.valid
+    )
+
+}
 
 object Lookup {
+
+  private val ValAp: Apply[Validated[LookupError, ?]] =
+    implicitly[Apply[Validated[LookupError, ?]]]
 
   implicit def LookupIsApply[Api[_ <: Mode]](
     implicit merger: props.MergeRequests[Api]
@@ -20,12 +32,13 @@ object Lookup {
     new Apply[Lookup[Api, ?]] {
       def ap[A, B](ff: Lookup[Api, A => B])(fa: Lookup[Api, A]) =
         Lookup[Api, B](
-          print = merger.apply(ff.print, fa.print),
-          parse = resp => ff.parse(resp)(fa.parse(resp))
+          buildRequest = merger.apply(ff.buildRequest, fa.buildRequest),
+          analyzeResponse = resp =>
+            ValAp.ap(ff.analyzeResponse(resp))(fa.analyzeResponse(resp))
         )
 
       def map[A, B](fa: Lookup[Api, A])(f: A => B): Lookup[Api, B] =
-        fa.copy(parse = (resp) => f(fa.parse(resp)))
+        fa.copy(analyzeResponse = resp => fa.analyzeResponse(resp).map(f))
     }
 
 }
