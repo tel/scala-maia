@@ -10,7 +10,7 @@ import scala.language.higherKinds
 
 class QueryMode[Super[_ <: Mode]] extends Mode {
   case class Atom[A](
-    name: String,
+    name: Symbol,
     buildRequest: Request[Super],
     analyzeResponse: Response[Super] => Validated[LookupError, A]
   ) {
@@ -19,7 +19,7 @@ class QueryMode[Super[_ <: Mode]] extends Mode {
   }
 
   case class Obj[Sub[_ <: Mode]](
-    name: String,
+    name: Symbol,
     buildRequest: Request[Sub] => Request[Super],
     analyzeResponse: Response[Super] => Validated[LookupError, Response[Sub]],
     subQuery: Query[Sub]

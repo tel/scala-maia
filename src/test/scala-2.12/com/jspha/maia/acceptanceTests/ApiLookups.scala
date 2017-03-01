@@ -6,7 +6,7 @@ package com.jspha.maia.acceptanceTests
 
 import cats.implicits._
 import com.jspha.maia._
-import com.jspha.maia.acceptanceTests.exampleApi.{Api, User}
+import com.jspha.maia.exampleApi.{Api, User}
 
 object ApiLookups {
 

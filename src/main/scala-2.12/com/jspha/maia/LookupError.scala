@@ -13,13 +13,13 @@ object LookupError {
   final case class Parallel(left: LookupError, right: LookupError)
       extends LookupError
 
-  final case class Nested(groupName: String, subError: LookupError)
+  final case class Nested(key: Symbol, subError: LookupError)
       extends LookupError
 
   // NOTE: This is marked CRITICAL because it ought to suggest a
   // library/server compliance error as opposed to an error
   // intentionally reported by the server.
-  final case class ResponseMissingCRITICAL(key: String) extends LookupError
+  final case class ResponseMissingCRITICAL(key: Symbol) extends LookupError
 
   implicit val LookupErrorIsSemiGroup: Semigroup[LookupError] =
     (x: LookupError, y: LookupError) => Parallel(x, y)

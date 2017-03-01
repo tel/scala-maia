@@ -2,9 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package com.jspha.maia.acceptanceTests.exampleApi
+package com.jspha.maia.exampleApi
 
-import cats.data.Validated
 import com.jspha.maia._
 import fs2.Task
 
@@ -23,20 +22,7 @@ object Api {
       }
     )
 
-  private val qm = new QueryMode[Api]
-
   val q: Query[Api] =
-    Api[QueryMode[Api]](
-      getUser = qm.Obj[User](
-        "getUser",
-        req =>
-          Api[RequestMode](
-            getUser = Some(req)
-        ),
-        resp =>
-          Validated.fromOption(resp.getUser,
-                               LookupError.ResponseMissingCRITICAL("getUser")),
-        User.q
-      )
-    )
+    implicitly[props.HasQuery[Api]].query
+
 }
