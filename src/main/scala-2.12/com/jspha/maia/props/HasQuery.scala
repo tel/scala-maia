@@ -64,7 +64,9 @@ object HasQuery {
         def handleResponse(resp: Response[Api]): Validated[LookupError, A] =
           Validated.fromOption(
             selector(respRepr.to(resp)),
-            LookupError.ResponseMissingCRITICAL(kWitness.value)
+            LookupError.Unexpected(
+              LookupError.UnexpectedError
+                .ServerShouldHaveResponded(kWitness.value))
           )
 
         val lookup: Lookup[Api, A] =
@@ -112,7 +114,8 @@ object HasQuery {
                 selector(respRepr.to(resp)) match {
                   case None =>
                     Validated.Invalid(
-                      LookupError.ResponseMissingCRITICAL(kWitness.value))
+                      LookupError.Unexpected(LookupError.UnexpectedError
+                        .ServerShouldHaveResponded(kWitness.value)))
                   case Some(respA) =>
                     // We mark the lower errors with an "object group
                     // name" forming a trie of errors

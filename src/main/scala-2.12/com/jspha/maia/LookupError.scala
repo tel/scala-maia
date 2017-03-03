@@ -16,12 +16,31 @@ object LookupError {
   final case class Nested(key: Symbol, subError: LookupError)
       extends LookupError
 
-  // NOTE: This is marked CRITICAL because it ought to suggest a
-  // library/server compliance error as opposed to an error
-  // intentionally reported by the server.
-  final case class ResponseMissingCRITICAL(key: Symbol) extends LookupError
+  /***
+    * Unexpected errors are those which arise out of a guarantee broken by
+    * the library. End users are not expected to be able to handle them
+    * necessarily. If one of these arises in your code, please leave an Issue
+    * on the repo---it is a bug.
+    */
+  final case class Unexpected(err: UnexpectedError) extends LookupError
 
   implicit val LookupErrorIsSemiGroup: Semigroup[LookupError] =
     (x: LookupError, y: LookupError) => Parallel(x, y)
+
+  sealed trait UnexpectedError
+
+  object UnexpectedError {
+
+    /***
+      * This error is reported when the the server did not report *any*
+      * response to a requested field. Since (a) servers are guaranteed to
+      * reply somehow to all requested fields and (b) Lookup values are always
+      * constructed with requests that cover all response-fields needed for
+      * handling... this error should never arise.
+      */
+    final case class ServerShouldHaveResponded(key: Symbol)
+        extends UnexpectedError
+
+  }
 
 }
