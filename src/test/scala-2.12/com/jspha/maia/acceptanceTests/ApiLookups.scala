@@ -16,6 +16,10 @@ object ApiLookups {
     }
 
   val lkUserNameAge: Lookup[Api, (String, Int)] =
+    // NOTE: This both (a) checks and (b) even infers just fine, but IntelliJ
+    // can't handle it and throws red.
+    // TODO: Let IntelliJ burn and remove the annotations to make the test
+    // stronger
     Api.q.getUser.get { user =>
       val name: Lookup[User, String] = user.name.get
       val age: Lookup[User, Int] = user.age.get
