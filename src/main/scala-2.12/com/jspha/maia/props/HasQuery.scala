@@ -121,7 +121,7 @@ object HasQuery {
                     // name" forming a trie of errors
                     subLookup
                       .handleResponse(respA)
-                      .leftMap(LookupError.Nested(kWitness.value, _))
+                      .leftMap(LookupError.Object(kWitness.value, _))
                 }
 
               Lookup[Api, R](request, doResp)

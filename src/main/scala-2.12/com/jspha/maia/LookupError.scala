@@ -10,10 +10,27 @@ sealed trait LookupError
 
 object LookupError {
 
+  /***
+    * Errors occur in `Parallel` when unhandled errors exist along two
+    * parallel branches of a `Lookup`. These errors are collected all
+    * together so that error reports are complete.
+    */
   final case class Parallel(left: LookupError, right: LookupError)
       extends LookupError
 
-  final case class Nested(key: Symbol, subError: LookupError)
+  /***
+    * Having the `Paralell` error type enables `LookupError` to form a
+    * `Semigroup` and, subsequently, collect errors with `Validated`.
+    */
+  implicit def LookupErrorIsSemiGroup: Semigroup[LookupError] =
+    (x: LookupError, y: LookupError) => Parallel(x, y)
+
+  /***
+    * When a `LookupError` arises in an object lookup we collect those errors
+    * and mark them with the object where they fail. In aggregate, this forms
+    * a trie of errors.
+    */
+  final case class Object(key: Symbol, subError: LookupError)
       extends LookupError
 
   /***
@@ -23,9 +40,6 @@ object LookupError {
     * on the repo---it is a bug.
     */
   final case class Unexpected(err: UnexpectedError) extends LookupError
-
-  implicit val LookupErrorIsSemiGroup: Semigroup[LookupError] =
-    (x: LookupError, y: LookupError) => Parallel(x, y)
 
   sealed trait UnexpectedError
 
