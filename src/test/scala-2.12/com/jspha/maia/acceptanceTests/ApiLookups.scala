@@ -11,8 +11,8 @@ import com.jspha.maia.exampleApi.{Api, User}
 object ApiLookups {
 
   val lkUserName: Lookup[Api, String] =
-    Api.q.getUser.get { user =>
-      user.name.get
+    Api.q.getUser { user =>
+      user.name
     }
 
   val lkUserNameAge: Lookup[Api, (String, Int)] =
@@ -20,9 +20,9 @@ object ApiLookups {
     // can't handle it and throws red.
     // TODO: Let IntelliJ burn and remove the annotations to make the test
     // stronger
-    Api.q.getUser.get { user =>
-      val name: Lookup[User, String] = user.name.get
-      val age: Lookup[User, Int] = user.age.get
+    Api.q.getUser { user =>
+      val name: Lookup[User, String] = user.name
+      val age: Lookup[User, Int] = user.age
       val tup: Lookup[User, (String, Int)] = (name |@| age).tupled
       tup
     }

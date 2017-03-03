@@ -55,27 +55,24 @@ object HasQuery {
       selector: Selector.Aux[RespRepr, K, ResponseMode#Atom[A]]
     ): Worker[FieldType[K, QueryMode[Api]#Atom[A]] :: T] =
       new Worker[FieldType[K, QueryMode[Api]#Atom[A]] :: T] {
-        val query: FieldType[K, QueryMode[Api]#Atom[A]] :: T = {
-          val qm: QueryMode[Api] = new QueryMode[Api]
-          val head: FieldType[K, QueryMode[Api]#Atom[A]] =
-            field[K] {
-              qm.Atom[A](
-                name = kWitness.value,
-                buildRequest = reqRepr.from(
-                  reqRepr
-                    .to(buildNullRequest.request)
-                    .updated(kWitness, true)(updater)
-                ),
-                analyzeResponse = (resp: Response[Api]) => {
-                  Validated.fromOption(
-                    respRepr.to(resp).get(kWitness)(selector),
-                    LookupError.ResponseMissingCRITICAL(kWitness.value)
-                  )
-                }
-              )
-            }
-          head :: recur.query
-        }
+
+        val request: Request[Api] =
+          reqRepr.from(
+            updater(reqRepr.to(buildNullRequest.request), field[K](true))
+          )
+
+        def handleResponse(resp: Response[Api]): Validated[LookupError, A] =
+          Validated.fromOption(
+            selector(respRepr.to(resp)),
+            LookupError.ResponseMissingCRITICAL(kWitness.value)
+          )
+
+        val lookup: Lookup[Api, A] =
+          Lookup[Api, A](request, handleResponse)
+
+        val query: FieldType[K, QueryMode[Api]#Atom[A]] :: T =
+          field[K](lookup) :: recur.query
+
       }
 
     implicit def WorkerRecurObj[K <: Symbol,
@@ -94,28 +91,41 @@ object HasQuery {
       recurQuery: HasQuery[A]
     ): Worker[FieldType[K, QueryMode[Api]#Obj[A]] :: T] =
       new Worker[FieldType[K, QueryMode[Api]#Obj[A]] :: T] {
+
+        val qm: QueryMode[Api] = new QueryMode[Api]
+
         val query: FieldType[K, QueryMode[Api]#Obj[A]] :: T = {
-          val qm: QueryMode[Api] = new QueryMode[Api]
-          val head: FieldType[K, QueryMode[Api]#Obj[A]] =
-            field[K] {
-              qm.Obj[A](
-                name = kWitness.value,
-                buildRequest = (subReq: Request[A]) =>
-                  reqRepr.from(
-                    reqRepr
-                      .to(buildNullRequest.request)
-                      .updated(kWitness, Option(subReq))(updater)
-                ),
-                analyzeResponse = (resp: Response[Api]) => {
-                  Validated.fromOption(
-                    respRepr.to(resp).get(kWitness)(selector),
-                    LookupError.ResponseMissingCRITICAL(kWitness.value)
-                  )
-                },
-                subQuery = recurQuery.query
-              )
+
+          val obj = new qm.Obj[A] {
+            def apply[R](cont: Query[A] => Lookup[A, R]): Lookup[Api, R] = {
+
+              val subLookup: Lookup[A, R] = cont(recurQuery.query)
+
+              val request: Request[Api] =
+                reqRepr.from(
+                  updater(
+                    reqRepr.to(buildNullRequest.request),
+                    field[K](Option(subLookup.request))
+                  ))
+
+              def doResp(resp: Response[Api]): Validated[LookupError, R] =
+                selector(respRepr.to(resp)) match {
+                  case None =>
+                    Validated.Invalid(
+                      LookupError.ResponseMissingCRITICAL(kWitness.value))
+                  case Some(respA) =>
+                    // We mark the lower errors with an "object group
+                    // name" forming a trie of errors
+                    subLookup
+                      .handleResponse(respA)
+                      .leftMap(LookupError.Nested(kWitness.value, _))
+                }
+
+              Lookup[Api, R](request, doResp)
             }
-          head :: recur.query
+          }
+
+          field[K](obj) :: recur.query
         }
       }
 

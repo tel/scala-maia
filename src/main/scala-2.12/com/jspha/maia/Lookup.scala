@@ -9,14 +9,14 @@ import cats._
 import cats.data.Validated
 
 final case class Lookup[Api[_ <: Mode], R](
-  buildRequest: Request[Api],
-  analyzeResponse: Response[Api] => Validated[LookupError, R]
+  request: Request[Api],
+  handleResponse: Response[Api] => Validated[LookupError, R]
 ) {
 
   def handle: Lookup[Api, Validated[LookupError, R]] =
     Lookup[Api, Validated[LookupError, R]](
-      buildRequest,
-      analyzeResponse = analyzeResponse andThen Validated.valid
+      request,
+      handleResponse = handleResponse andThen Validated.valid
     )
 
 }
@@ -32,13 +32,13 @@ object Lookup {
     new Apply[Lookup[Api, ?]] {
       def ap[A, B](ff: Lookup[Api, A => B])(fa: Lookup[Api, A]) =
         Lookup[Api, B](
-          buildRequest = merger.apply(ff.buildRequest, fa.buildRequest),
-          analyzeResponse = resp =>
-            ValAp.ap(ff.analyzeResponse(resp))(fa.analyzeResponse(resp))
+          request = merger.apply(ff.request, fa.request),
+          handleResponse =
+            resp => ValAp.ap(ff.handleResponse(resp))(fa.handleResponse(resp))
         )
 
       def map[A, B](fa: Lookup[Api, A])(f: A => B): Lookup[Api, B] =
-        fa.copy(analyzeResponse = resp => fa.analyzeResponse(resp).map(f))
+        fa.copy(handleResponse = resp => fa.handleResponse(resp).map(f))
     }
 
 }
