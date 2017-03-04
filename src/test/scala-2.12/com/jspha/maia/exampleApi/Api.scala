@@ -16,11 +16,7 @@ object Api {
   type Fm = FetcherMode[Task]
 
   val fetcher: Fetcher[Task, Api] =
-    Api[Fm](
-      getUser = Task.now {
-        User.fetchCurrent
-      }
-    )
+    Api[Fm](getUser = Task.now(User.fetchCurrent))
 
   val q: Query[Api] =
     implicitly[props.HasQuery[Api]].query

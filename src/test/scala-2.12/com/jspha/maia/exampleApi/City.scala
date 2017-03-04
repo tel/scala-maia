@@ -6,7 +6,6 @@ package com.jspha.maia.exampleApi
 
 import com.jspha.maia._
 import fs2.Task
-import fs2.interop.cats._
 
 final case class City[M <: Mode](
   name: M#Atom[String],
@@ -21,12 +20,7 @@ object City {
     City[Fm](
       name = Task.now("Atlanta"),
       location = Task.now {
-        Fetcher.ofConst(
-          Location[ConstantMode](
-            latitude = 33.7490,
-            longitude = 84.3880
-          )
-        )
+        Location.fetchConst(33.7490, 84.3880)
       }
     )
 

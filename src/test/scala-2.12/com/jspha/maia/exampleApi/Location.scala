@@ -5,6 +5,7 @@
 package com.jspha.maia.exampleApi
 
 import com.jspha.maia._
+import fs2.Task
 
 final case class Location[M <: Mode](
   latitude: M#Atom[Double],
@@ -12,6 +13,15 @@ final case class Location[M <: Mode](
 )
 
 object Location {
+
+  type Fm = FetcherMode[Task]
+
+  def fetchConst(latitude: Double,
+                 longitude: Double): Fetcher[Task, Location] =
+    Location[Fm](
+      latitude = Task.now(latitude),
+      longitude = Task.now(longitude)
+    )
 
   val q: Query[Location] =
     implicitly[props.HasQuery[Location]].query

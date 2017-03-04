@@ -6,7 +6,6 @@ package com.jspha.maia.exampleApi
 
 import com.jspha.maia._
 import fs2.Task
-import fs2.interop.cats._
 
 final case class User[M <: Mode](
   name: M#Atom[String],
@@ -24,11 +23,7 @@ object User {
       name = Task.now("Joseph Abrahamson"),
       age = Task.now(29),
       hometown = Task.now(City.atlanta),
-      lastKnownLocation = Task.now {
-        Fetcher.ofConst(
-          Location[ConstantMode](latitude = 0.0, longitude = 0.0)
-        )
-      }
+      lastKnownLocation = Task.now(Location.fetchConst(42.3601, 71.0589))
     )
 
   val q: Query[User] =
