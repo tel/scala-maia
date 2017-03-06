@@ -7,7 +7,10 @@ package com.jspha.maia.props
 import scala.language.higherKinds
 import shapeless._
 import cats._
+import cats.implicits._
 import com.jspha.maia._
+
+import scala.collection.immutable.HashMap
 
 trait Interprets[M[_], Api[_ <: Mode]] {
   def apply(i: Fetcher[M, Api], r: Request[Api]): M[Response[Api]]
@@ -47,16 +50,51 @@ object Interprets {
               FetcherMode[M]#Atom[A] :: TI,
               RequestMode.Atom[A] :: TReq,
               ResponseMode.Atom[A] :: TResp] = {
-      (ii: M[A] :: TI, rr: Boolean :: TReq) =>
+      (ii: FetcherMode[M]#Atom[A] :: TI, rr: RequestMode.Atom[A] :: TReq) =>
         {
           val M = Monad[M]
-          import M._
 
           (ii, rr) match {
             case (i :: is, r :: rs) =>
-              val here: M[Option[A]] = if (r) map(i)(Some(_)) else pure(None)
+              val here: M[Option[A]] =
+                r match {
+                  case false => M.pure(None)
+                  case true => M.map(i)(Some(_))
+                }
               val there = rWorker(is, rs)
-              map2(here, there)((h, t) => h :: t)
+              M.map2(here, there)((h, t) => h :: t)
+          }
+        }
+
+    }
+
+    implicit def WorkerRecurIndexedAtom[M[_]: Monad,
+                                        A,
+                                        I,
+                                        TI <: HList,
+                                        TReq <: HList,
+                                        TResp <: HList](
+      implicit rWorker: Worker[M, TI, TReq, TResp]
+    ): Worker[M,
+              FetcherMode[M]#IndexedAtom[I, A] :: TI,
+              RequestMode.IndexedAtom[I, A] :: TReq,
+              ResponseMode.IndexedAtom[I, A] :: TResp] = {
+      (ii: FetcherMode[M]#IndexedAtom[I, A] :: TI,
+       rr: RequestMode.IndexedAtom[I, A] :: TReq) =>
+        {
+          val M = Monad[M]
+
+          (ii, rr) match {
+            case (i :: is, r :: rs) =>
+              val here: M[HashMap[I, A]] =
+                Foldable[Set].foldM(r, HashMap.empty[I, A]) {
+                  case (map, ix) =>
+                    M.map(i(ix)) { a =>
+                      map + (ix -> a)
+                    }
+                }
+              val there = rWorker(is, rs)
+              M.map2(here, there)((h, t) => h :: t)
           }
         }
 
@@ -86,6 +124,44 @@ object Interprets {
                   case Some(objReq) =>
                     M.flatMap(i) { objInt =>
                       M.map(rObj(objInt, objReq))(Some(_))
+                    }
+                }
+              val there: M[TResp] = rWorker(is, rs)
+              map2(here, there)((h, t) => h :: t)
+          }
+        }
+
+    }
+
+    implicit def WorkerRecurIndexedObj[M[_]: Monad,
+                                       A[_ <: Mode],
+                                       I,
+                                       TI <: HList,
+                                       TReq <: HList,
+                                       TResp <: HList](
+      implicit rWorker: Worker[M, TI, TReq, TResp],
+      rObj: Interprets[M, A]
+    ): Worker[M,
+              FetcherMode[M]#IndexedObj[I, A] :: TI,
+              RequestMode.IndexedObj[I, A] :: TReq,
+              ResponseMode.IndexedObj[I, A] :: TResp] = {
+      (ii: FetcherMode[M]#IndexedObj[I, A] :: TI,
+       rr: RequestMode.IndexedObj[I, A] :: TReq) =>
+        {
+          val M = Monad[M]
+          import M._
+
+          (ii, rr) match {
+            case (i :: is, r :: rs) =>
+              val i_ : I => M[Fetcher[M, A]] = i
+              val r_ : HashMap[I, Request[A]] = r
+              val here: M[HashMap[I, Response[A]]] =
+                Foldable[Set].foldM(r.toSet, HashMap.empty[I, Response[A]]) {
+                  case (map, (ix, subReq)) =>
+                    M.flatMap(i(ix)) { fetcher =>
+                      rObj(fetcher, subReq).map { result =>
+                        map + (ix -> result)
+                      }
                     }
                 }
               val there: M[TResp] = rWorker(is, rs)

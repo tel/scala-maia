@@ -8,7 +8,7 @@ import com.jspha.maia._
 import fs2.Task
 
 final case class Api[M <: Mode](
-  getUser: M#Obj[User]
+  getUser: M#IndexedObj[User.Id, User]
 )
 
 object Api {
@@ -16,7 +16,7 @@ object Api {
   type Fm = FetcherMode[Task]
 
   val fetcher: Fetcher[Task, Api] =
-    Api[Fm](getUser = Task.now(User.fetchCurrent))
+    Api[Fm](getUser = id => Task.now(User.fetch(id)))
 
   val q: Query[Api] =
     implicitly[props.HasQuery[Api]].query

@@ -17,11 +17,14 @@ object NullRequestTests {
   val ky = Witness('y)
 
   val workerHNil: Worker[HNil] = implicitly
-  val workerHConsAtom: Worker[FieldType[kx.T, RequestMode.Atom[Int]] :: HNil] =
-    implicitly
-  val workerHConsAtom2: Worker[FieldType[ky.T, RequestMode.Atom[Int]] ::
-    FieldType[kx.T, RequestMode.Atom[Int]] ::
+  val workerHConsAtom: Worker[
+    FieldType[kx.T, RequestMode.IndexedAtom[Unit, Int]] ::
       HNil] =
+    implicitly
+  val workerHConsAtom2: Worker[
+    FieldType[ky.T, RequestMode.IndexedAtom[Unit, Int]] ::
+      FieldType[kx.T, RequestMode.IndexedAtom[Unit, Int]] ::
+        HNil] =
     implicitly
   val workerHConsObj: Worker[
     FieldType[kx.T, RequestMode.Obj[Location]] :: HNil] =

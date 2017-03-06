@@ -9,6 +9,8 @@ import com.jspha.maia._
 import shapeless._
 import shapeless.labelled._
 
+import scala.collection.immutable.HashMap
+
 trait NullRequest[Api[_ <: Mode]] {
   val request: Request[Api]
 }
@@ -41,12 +43,31 @@ object NullRequest {
           field[K](false) :: recur.request
       }
 
+    implicit def WorkerRecurIndexedAtom[A, I, K <: Symbol, T <: HList](
+      implicit recur: Worker[T]
+    ): Worker[FieldType[K, RequestMode.IndexedAtom[I, A]] :: T] =
+      new Worker[FieldType[K, RequestMode.IndexedAtom[I, A]] :: T] {
+        val request: FieldType[K, RequestMode.IndexedAtom[I, A]] :: T =
+          field[K](Set.empty[I]) :: recur.request
+      }
+
     implicit def WorkerRecurObj[A[_ <: Mode], K <: Symbol, T <: HList](
       implicit recur: Worker[T]
     ): Worker[FieldType[K, RequestMode.Obj[A]] :: T] =
       new Worker[FieldType[K, RequestMode.Obj[A]] :: T] {
         val request: FieldType[K, RequestMode.Obj[A]] :: T =
           field[K](None) :: recur.request
+      }
+
+    implicit def WorkerRecurIndexedObj[A[_ <: Mode],
+                                       I,
+                                       K <: Symbol,
+                                       T <: HList](
+      implicit recur: Worker[T]
+    ): Worker[FieldType[K, RequestMode.IndexedObj[I, A]] :: T] =
+      new Worker[FieldType[K, RequestMode.IndexedObj[I, A]] :: T] {
+        val request: FieldType[K, RequestMode.IndexedObj[I, A]] :: T =
+          field[K](HashMap.empty[I, Request[A]]) :: recur.request
       }
 
   }

@@ -13,6 +13,8 @@ import shapeless.labelled._
 import shapeless.ops.record._
 import shapeless.record._
 
+import scala.collection.immutable.HashMap
+
 trait HasQuery[A[_ <: Mode]] {
   val query: Query[A]
 }
@@ -61,19 +63,63 @@ object HasQuery {
             updater(reqRepr.to(buildNullRequest.request), field[K](true))
           )
 
-        def handleResponse(resp: Response[Api]): Validated[LookupError, A] =
+        def handleResponse(resp: Response[Api]): Validated[LookupError, A] = {
           Validated.fromOption(
             selector(respRepr.to(resp)),
             LookupError.Unexpected(
               LookupError.UnexpectedError
                 .ServerShouldHaveResponded(kWitness.value))
           )
+        }
 
         val lookup: Lookup[Api, A] =
           Lookup[Api, A](request, handleResponse)
 
         val query: FieldType[K, QueryMode[Api]#Atom[A]] :: T =
           field[K](lookup) :: recur.query
+
+      }
+
+    implicit def WorkerRecurIndexedAtom[K <: Symbol,
+                                        ReqRepr <: HList,
+                                        RespRepr <: HList,
+                                        Api[_ <: Mode],
+                                        A,
+                                        I,
+                                        T <: HList](
+      implicit recur: Worker[T],
+      kWitness: Witness.Aux[K],
+      buildNullRequest: NullRequest[Api],
+      reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
+      updater: Updater.Aux[ReqRepr,
+                           FieldType[K, RequestMode#IndexedAtom[I, A]],
+                           ReqRepr],
+      respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
+      selector: Selector.Aux[RespRepr, K, ResponseMode#IndexedAtom[I, A]]
+    ): Worker[FieldType[K, QueryMode[Api]#IndexedAtom[I, A]] :: T] =
+      new Worker[FieldType[K, QueryMode[Api]#IndexedAtom[I, A]] :: T] {
+
+        def lookup(ix: I): Lookup[Api, A] = {
+
+          val request: Request[Api] =
+            reqRepr.from(
+              updater(reqRepr.to(buildNullRequest.request), field[K](Set(ix)))
+            )
+
+          def handleResponse(resp: Response[Api]): Validated[LookupError, A] = {
+            Validated.fromOption(
+              selector(respRepr.to(resp)).get(ix),
+              LookupError.Unexpected(
+                LookupError.UnexpectedError
+                  .ServerShouldHaveResponded(kWitness.value))
+            )
+          }
+
+          Lookup[Api, A](request, handleResponse)
+        }
+
+        val query: FieldType[K, QueryMode[Api]#IndexedAtom[I, A]] :: T =
+          field[K](lookup _) :: recur.query
 
       }
 
@@ -112,6 +158,65 @@ object HasQuery {
 
               def doResp(resp: Response[Api]): Validated[LookupError, R] =
                 selector(respRepr.to(resp)) match {
+                  case None =>
+                    Validated.Invalid(
+                      LookupError.Unexpected(LookupError.UnexpectedError
+                        .ServerShouldHaveResponded(kWitness.value)))
+                  case Some(respA) =>
+                    // We mark the lower errors with an "object group
+                    // name" forming a trie of errors
+                    subLookup
+                      .handleResponse(respA)
+                      .leftMap(LookupError.Object(kWitness.value, _))
+                }
+
+              Lookup[Api, R](request, doResp)
+            }
+          }
+
+          field[K](obj) :: recur.query
+        }
+      }
+    implicit def WorkerRecurIndexedObj[K <: Symbol,
+                                       ReqRepr <: HList,
+                                       RespRepr <: HList,
+                                       Api[_ <: Mode],
+                                       A[_ <: Mode],
+                                       I,
+                                       T <: HList](
+      implicit recur: Worker[T],
+      kWitness: Witness.Aux[K],
+      buildNullRequest: NullRequest[Api],
+      reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
+      updater: Updater.Aux[ReqRepr,
+                           FieldType[K, RequestMode#IndexedObj[I, A]],
+                           ReqRepr],
+      respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
+      selector: Selector.Aux[RespRepr, K, ResponseMode#IndexedObj[I, A]],
+      recurQuery: HasQuery[A]
+    ): Worker[FieldType[K, QueryMode[Api]#IndexedObj[I, A]] :: T] =
+      new Worker[FieldType[K, QueryMode[Api]#IndexedObj[I, A]] :: T] {
+
+        val qm: QueryMode[Api] = new QueryMode[Api]
+
+        val query: FieldType[K, QueryMode[Api]#IndexedObj[I, A]] :: T = {
+
+          val obj = new qm.IndexedObj[I, A] {
+            def apply[R](ix: I)(
+              cont: Query[A] => Lookup[A, R]): Lookup[Api, R] = {
+
+              val subLookup: Lookup[A, R] =
+                cont(recurQuery.query)
+
+              val request: Request[Api] =
+                reqRepr.from(
+                  updater(
+                    reqRepr.to(buildNullRequest.request),
+                    field[K](HashMap(ix -> subLookup.request))
+                  ))
+
+              def doResp(resp: Response[Api]): Validated[LookupError, R] =
+                selector(respRepr.to(resp)).get(ix) match {
                   case None =>
                     Validated.Invalid(
                       LookupError.Unexpected(LookupError.UnexpectedError

@@ -4,14 +4,12 @@
 
 package com.jspha.maia
 
+import scala.collection.immutable.HashMap
 import scala.language.higherKinds
-
-// NOTE: We need to use Options here. It might feel like our types could
-// prevent the need for Options here (and subsequently, certain kinds of
-// failures later) but that would require type parameterization on
-// information about particular Requests---that's (probably) a bridge too far
 
 object ResponseMode extends Mode {
   type Atom[A] = Option[A]
+  type IndexedAtom[I, A] = HashMap[I, A]
   type Obj[A[_ <: Mode]] = Option[Response[A]]
+  type IndexedObj[I, A[_ <: Mode]] = HashMap[I, Response[A]]
 }

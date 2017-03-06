@@ -8,5 +8,8 @@ import scala.language.higherKinds
 
 trait Mode {
   type Atom[A]
+  type IndexedAtom[I, A]
+
   type Obj[A[_ <: Mode]]
+  type IndexedObj[I, A[_ <: Mode]]
 }

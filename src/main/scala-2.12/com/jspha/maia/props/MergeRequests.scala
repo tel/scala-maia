@@ -8,6 +8,8 @@ import scala.language.higherKinds
 import com.jspha.maia._
 import shapeless._
 
+import scala.collection.immutable.HashMap
+
 // TODO: Implement this computation via implicits
 trait MergeRequests[Api[_ <: Mode]] {
   def apply(a: Request[Api], b: Request[Api]): Request[Api]
@@ -33,9 +35,18 @@ object MergeRequests {
     implicit def WorkerRecurAtom[A, Tail <: HList](
       implicit recur: Worker[Tail]
     ): Worker[RequestMode.Atom[A] :: Tail] =
-      (ll: Boolean :: Tail, rr: Boolean :: Tail) =>
+      (ll: RequestMode.Atom[A] :: Tail, rr: RequestMode.Atom[A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) => (l || r) :: recur(ls, rs)
+      }
+
+    implicit def WorkerRecurIndexedAtom[A, I, Tail <: HList](
+      implicit recur: Worker[Tail]
+    ): Worker[RequestMode.IndexedAtom[I, A] :: Tail] =
+      (ll: RequestMode.IndexedAtom[I, A] :: Tail,
+       rr: RequestMode.IndexedAtom[I, A] :: Tail) =>
+        (ll, rr) match {
+          case (l :: ls, r :: rs) => (l ++ r) :: recur(ls, rs)
       }
 
     implicit def WorkerRecurObj[A[_ <: Mode], Tail <: HList](
@@ -49,6 +60,21 @@ object MergeRequests {
           case (None :: ls, Some(r) :: rs) => Some(r) :: recur(ls, rs)
           case (Some(l) :: ls, Some(r) :: rs) =>
             Some(recurObj(l, r)) :: recur(ls, rs)
+      }
+
+    implicit def WorkerRecurIndexedObj[A[_ <: Mode], I, Tail <: HList](
+      implicit recur: Worker[Tail],
+      recurObj: MergeRequests[A]
+    ): Worker[RequestMode.IndexedObj[I, A] :: Tail] =
+      (ll: RequestMode.IndexedObj[I, A] :: Tail,
+       rr: RequestMode.IndexedObj[I, A] :: Tail) =>
+        (ll, rr) match {
+          case (l :: ls, r :: rs) =>
+            val here: HashMap[I, Request[A]] = l.merged(r) { (lt, rt) =>
+              (lt._1, recurObj(lt._2, rt._2))
+            }
+            val there: Tail = recur(ls, rs)
+            here :: there
       }
 
   }

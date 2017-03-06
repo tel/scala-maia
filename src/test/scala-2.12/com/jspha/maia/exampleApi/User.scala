@@ -16,15 +16,28 @@ final case class User[M <: Mode](
 
 object User {
 
+  sealed trait Id
+  case object Default extends Id
+  case object JosephAbrahamson extends Id
+
   type Fm = FetcherMode[Task]
 
-  val fetchCurrent: Fetcher[Task, User] =
-    User[Fm](
-      name = Task.now("Joseph Abrahamson"),
-      age = Task.now(29),
-      hometown = Task.now(City.atlanta),
-      lastKnownLocation = Task.now(Location.fetchConst(42.3601, 71.0589))
-    )
+  def fetch(id: Id): Fetcher[Task, User] = id match {
+    case Default =>
+      User[Fm](
+        name = Task.now("Root"),
+        age = Task.now(-1),
+        hometown = Task.now(City.atlanta),
+        lastKnownLocation = Task.now(Location.fetchConst(0, 0))
+      )
+    case JosephAbrahamson =>
+      User[Fm](
+        name = Task.now("Joseph Abrahamson"),
+        age = Task.now(29),
+        hometown = Task.now(City.atlanta),
+        lastKnownLocation = Task.now(Location.fetchConst(42.3601, 71.0589))
+      )
+  }
 
   val q: Query[User] =
     implicitly[props.HasQuery[User]].query
