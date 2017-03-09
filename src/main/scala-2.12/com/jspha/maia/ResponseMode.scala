@@ -11,5 +11,6 @@ object ResponseMode extends Mode {
   type Atom[A] = Option[A]
   type IndexedAtom[I, A] = HashMap[I, A]
   type Obj[A[_ <: Mode]] = Option[Response[A]]
+  type ObjM[M <: Multiplicity, A[_ <: Mode]] = Option[M#Wrap[Response[A]]]
   type IndexedObj[I, A[_ <: Mode]] = HashMap[I, Response[A]]
 }

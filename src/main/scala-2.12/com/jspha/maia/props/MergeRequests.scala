@@ -62,6 +62,21 @@ object MergeRequests {
             Some(recurObj(l, r)) :: recur(ls, rs)
       }
 
+    implicit def WorkerRecurObjM[A[_ <: Mode],
+                                 M <: Multiplicity,
+                                 Tail <: HList](
+      implicit recur: Worker[Tail],
+      recurObj: MergeRequests[A]
+    ): Worker[RequestMode.ObjM[M, A] :: Tail] =
+      (ll: Option[Request[A]] :: Tail, rr: Option[Request[A]] :: Tail) =>
+        (ll, rr) match {
+          case (None :: ls, None :: rs) => None :: recur(ls, rs)
+          case (Some(l) :: ls, None :: rs) => Some(l) :: recur(ls, rs)
+          case (None :: ls, Some(r) :: rs) => Some(r) :: recur(ls, rs)
+          case (Some(l) :: ls, Some(r) :: rs) =>
+            Some(recurObj(l, r)) :: recur(ls, rs)
+      }
+
     implicit def WorkerRecurIndexedObj[A[_ <: Mode], I, Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]

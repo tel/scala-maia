@@ -59,6 +59,17 @@ object NullRequest {
           field[K](None) :: recur.request
       }
 
+    implicit def WorkerRecurObjM[A[_ <: Mode],
+                                 M <: Multiplicity,
+                                 K <: Symbol,
+                                 T <: HList](
+      implicit recur: Worker[T]
+    ): Worker[FieldType[K, RequestMode.ObjM[M, A]] :: T] =
+      new Worker[FieldType[K, RequestMode.ObjM[M, A]] :: T] {
+        val request: FieldType[K, RequestMode.ObjM[M, A]] :: T =
+          field[K](None) :: recur.request
+      }
+
     implicit def WorkerRecurIndexedObj[A[_ <: Mode],
                                        I,
                                        K <: Symbol,

@@ -5,7 +5,7 @@
 package com.jspha.maia.exampleApi
 
 import com.jspha.maia._
-import fs2.Task
+import cats._
 
 final case class City[M <: Mode](
   name: M#Atom[String],
@@ -14,17 +14,18 @@ final case class City[M <: Mode](
 
 object City {
 
-  type Fm = FetcherMode[Task]
+  type Fm = FetcherMode[Id]
 
-  def atlanta: Fetcher[Task, City] =
+  def atlanta: Fetcher[Id, City] =
     City[Fm](
-      name = Task.now("Atlanta"),
-      location = Task.now {
-        Location.fetchConst(33.7490, 84.3880)
-      }
+      name = "Atlanta",
+      location = Location.fetchConst(33.7490, 84.3880)
     )
 
   val q: Query[City] =
     implicitly[props.HasQuery[City]].query
+
+  val i: props.Interprets[Id, City] =
+    props.Interprets[Id, City]
 
 }

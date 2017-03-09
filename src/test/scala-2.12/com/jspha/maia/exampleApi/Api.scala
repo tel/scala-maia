@@ -5,20 +5,31 @@
 package com.jspha.maia.exampleApi
 
 import com.jspha.maia._
-import fs2.Task
+import cats._
 
 final case class Api[M <: Mode](
-  getUser: M#IndexedObj[User.Id, User]
+  getUser: M#IndexedObj[User.Identity, User],
+  getAllUsers: M#ObjM[Multiplicity.Collection, User]
 )
 
 object Api {
 
-  type Fm = FetcherMode[Task]
+  type Fm = FetcherMode[Id]
 
-  val fetcher: Fetcher[Task, Api] =
-    Api[Fm](getUser = id => Task.now(User.fetch(id)))
+  val fetcher: Fetcher[Id, Api] =
+    Api[Fm](
+      getUser = (id: User.Identity) => User.fetch(id),
+      getAllUsers = Multiplicity.Collection.Wrap(
+        List(
+          User.fetch(User.Default),
+          User.fetch(User.JosephAbrahamson)
+        ))
+    )
 
   val q: Query[Api] =
     implicitly[props.HasQuery[Api]].query
+
+  val i: props.Interprets[Id, Api] =
+    props.Interprets[Id, Api]
 
 }

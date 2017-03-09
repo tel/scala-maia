@@ -15,6 +15,10 @@ class QueryMode[Super[_ <: Mode]] extends Mode {
     def apply[R](cont: Query[Sub] => Lookup[Sub, R]): Lookup[Super, R]
   }
 
+  trait ObjM[M <: Multiplicity, Sub[_ <: Mode]] {
+    def apply[R](cont: Query[Sub] => Lookup[Sub, R]): Lookup[Super, M#Wrap[R]]
+  }
+
   trait IndexedObj[I, Sub[_ <: Mode]] {
     def apply[R](ix: I)(cont: Query[Sub] => Lookup[Sub, R]): Lookup[Super, R]
   }

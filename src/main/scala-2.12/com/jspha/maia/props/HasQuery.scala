@@ -4,7 +4,9 @@
 
 package com.jspha.maia.props
 
+import cats.Id
 import cats.data.Validated
+import com.jspha.maia.LookupError.Object
 
 import scala.language.higherKinds
 import com.jspha.maia._
@@ -177,6 +179,70 @@ object HasQuery {
           field[K](obj) :: recur.query
         }
       }
+
+    implicit def WorkerRecurObjM[K <: Symbol,
+                                 ReqRepr <: HList,
+                                 RespRepr <: HList,
+                                 Api[_ <: Mode],
+                                 A[_ <: Mode],
+                                 M <: Multiplicity,
+                                 T <: HList](
+      implicit recur: Worker[T],
+      kWitness: Witness.Aux[K],
+      buildNullRequest: NullRequest[Api],
+      reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
+      updater: Updater.Aux[ReqRepr,
+                           FieldType[K, RequestMode#ObjM[M, A]],
+                           ReqRepr],
+      respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
+      selector: Selector.Aux[RespRepr, K, ResponseMode#ObjM[M, A]],
+      multOps: Multiplicity.Ops[M],
+      recurQuery: HasQuery[A]
+    ): Worker[FieldType[K, QueryMode[Api]#ObjM[M, A]] :: T] =
+      new Worker[FieldType[K, QueryMode[Api]#ObjM[M, A]] :: T] {
+
+        val qm: QueryMode[Api] = new QueryMode[Api]
+
+        val query: FieldType[K, QueryMode[Api]#ObjM[M, A]] :: T = {
+
+          val obj = new qm.ObjM[M, A] {
+            def apply[R](
+              cont: Query[A] => Lookup[A, R]): Lookup[Api, M#Wrap[R]] = {
+
+              val subLookup: Lookup[A, R] = cont(recurQuery.query)
+
+              val request: Request[Api] =
+                reqRepr.from(
+                  updater(
+                    reqRepr.to(buildNullRequest.request),
+                    field[K](Option(subLookup.request))
+                  ))
+
+              def doResp(
+                resp: Response[Api]): Validated[LookupError, M#Wrap[R]] =
+                selector(respRepr.to(resp)) match {
+                  case None =>
+                    Validated.Invalid(
+                      LookupError.Unexpected(LookupError.UnexpectedError
+                        .ServerShouldHaveResponded(kWitness.value)))
+                  case Some(respA) =>
+                    multOps.traversable
+                      .traverse[Validated[LookupError, ?], Response[A], R](
+                        respA.it)(subLookup.handleResponse)
+                      .map(multOps.wrap)
+                      // We mark the lower errors with an "object group
+                      // name" forming a trie of errors
+                      .leftMap(LookupError.Object(kWitness.value, _))
+                }
+
+              Lookup[Api, M#Wrap[R]](request, doResp)
+            }
+          }
+
+          field[K](obj) :: recur.query
+        }
+      }
+
     implicit def WorkerRecurIndexedObj[K <: Symbol,
                                        ReqRepr <: HList,
                                        RespRepr <: HList,

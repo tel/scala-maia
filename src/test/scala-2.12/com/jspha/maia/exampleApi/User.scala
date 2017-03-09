@@ -5,7 +5,7 @@
 package com.jspha.maia.exampleApi
 
 import com.jspha.maia._
-import fs2.Task
+import cats._
 
 final case class User[M <: Mode](
   name: M#Atom[String],
@@ -16,30 +16,33 @@ final case class User[M <: Mode](
 
 object User {
 
-  sealed trait Id
-  case object Default extends Id
-  case object JosephAbrahamson extends Id
+  sealed trait Identity
+  case object Default extends Identity
+  case object JosephAbrahamson extends Identity
 
-  type Fm = FetcherMode[Task]
+  type Fm = FetcherMode[Id]
 
-  def fetch(id: Id): Fetcher[Task, User] = id match {
+  def fetch(id: Identity): Fetcher[Id, User] = id match {
     case Default =>
       User[Fm](
-        name = Task.now("Root"),
-        age = Task.now(-1),
-        hometown = Task.now(City.atlanta),
-        lastKnownLocation = Task.now(Location.fetchConst(0, 0))
+        name = "Root",
+        age = -1,
+        hometown = City.atlanta,
+        lastKnownLocation = Location.fetchConst(0, 0)
       )
     case JosephAbrahamson =>
       User[Fm](
-        name = Task.now("Joseph Abrahamson"),
-        age = Task.now(29),
-        hometown = Task.now(City.atlanta),
-        lastKnownLocation = Task.now(Location.fetchConst(42.3601, 71.0589))
+        name = "Joseph Abrahamson",
+        age = 29,
+        hometown = City.atlanta,
+        lastKnownLocation = Location.fetchConst(42.3601, 71.0589)
       )
   }
 
   val q: Query[User] =
     implicitly[props.HasQuery[User]].query
+
+  val i: props.Interprets[Id, User] =
+    props.Interprets[Id, User]
 
 }

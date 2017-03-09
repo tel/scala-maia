@@ -18,6 +18,9 @@ trait Interprets[M[_], Api[_ <: Mode]] {
 
 object Interprets {
 
+  def apply[F[_], Api[_ <: Mode]](
+    implicit I: Interprets[F, Api]): Interprets[F, Api] = I
+
   implicit def InterpretsGeneric[M[_]: Monad,
                                  Api[_ <: Mode],
                                  ReprI <: HList,
@@ -100,38 +103,72 @@ object Interprets {
 
     }
 
-    implicit def WorkerRecurObj[M[_]: Monad,
+    implicit def WorkerRecurObj[F[_]: Monad,
                                 A[_ <: Mode],
                                 TI <: HList,
                                 TReq <: HList,
                                 TResp <: HList](
-      implicit rWorker: Worker[M, TI, TReq, TResp],
-      rObj: Interprets[M, A]
-    ): Worker[M,
-              FetcherMode[M]#Obj[A] :: TI,
+      implicit rWorker: Worker[F, TI, TReq, TResp],
+      rObj: Interprets[F, A]
+    ): Worker[F,
+              FetcherMode[F]#Obj[A] :: TI,
               RequestMode.Obj[A] :: TReq,
               ResponseMode.Obj[A] :: TResp] = {
-      (ii: M[Fetcher[M, A]] :: TI, rr: Option[Request[A]] :: TReq) =>
+      (ii: F[Fetcher[F, A]] :: TI, rr: Option[Request[A]] :: TReq) =>
         {
-          val M = Monad[M]
-          import M._
+          val F = Monad[F]
 
           (ii, rr) match {
             case (i :: is, r :: rs) =>
-              val here: M[Option[Response[A]]] =
+              val here: F[Option[Response[A]]] =
                 r match {
-                  case None => M.pure(None)
+                  case None => F.pure(None)
                   case Some(objReq) =>
-                    M.flatMap(i) { objInt =>
-                      M.map(rObj(objInt, objReq))(Some(_))
+                    F.flatMap(i) { objInt =>
+                      F.map(rObj(objInt, objReq))(Some(_))
                     }
                 }
-              val there: M[TResp] = rWorker(is, rs)
-              map2(here, there)((h, t) => h :: t)
+              val there: F[TResp] = rWorker(is, rs)
+              F.map2(here, there)((h, t) => h :: t)
           }
         }
 
     }
+
+    implicit def WorkerRecurObjM[F[_]: Monad,
+                                 A[_ <: Mode],
+                                 M <: Multiplicity,
+                                 TI <: HList,
+                                 TReq <: HList,
+                                 TResp <: HList](
+      implicit rWorker: Worker[F, TI, TReq, TResp],
+      multOps: Multiplicity.Ops[M],
+      rObj: Interprets[F, A]
+    ): Worker[F,
+              FetcherMode[F]#ObjM[M, A] :: TI,
+              RequestMode.ObjM[M, A] :: TReq,
+              ResponseMode.ObjM[M, A] :: TResp] =
+      (ii: FetcherMode[F]#ObjM[M, A] :: TI,
+       rr: RequestMode.ObjM[M, A] :: TReq) => {
+        val F = Monad[F]
+
+        (ii, rr) match {
+          case (i :: is, r :: rs) =>
+            val here: F[Option[M#Wrap[Response[A]]]] =
+              r match {
+                case None => F.pure(None)
+                case Some(objReq) =>
+                  F.flatMap(i) { (collOfObjInt: M#Wrap[Fetcher[F, A]]) =>
+                    F.map(
+                      multOps.traversable.traverse(collOfObjInt.it)(
+                        rObj(_, objReq))
+                    )(x => Some(multOps.wrap(x)))
+                  }
+              }
+            val there: F[TResp] = rWorker(is, rs)
+            F.map2(here, there)((h, t) => h :: t)
+        }
+      }
 
     implicit def WorkerRecurIndexedObj[M[_]: Monad,
                                        A[_ <: Mode],

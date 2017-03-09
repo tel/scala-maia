@@ -11,5 +11,6 @@ trait Mode {
   type IndexedAtom[I, A]
 
   type Obj[A[_ <: Mode]]
+  type ObjM[M <: Multiplicity, A[_ <: Mode]]
   type IndexedObj[I, A[_ <: Mode]]
 }
