@@ -4,16 +4,12 @@
 
 package com.jspha.maia.props
 
-import cats.Id
-import cats.data.Validated
-import com.jspha.maia.LookupError.Object
-
 import scala.language.higherKinds
 import com.jspha.maia._
 import shapeless._
 import shapeless.labelled._
 import shapeless.ops.record._
-import shapeless.record._
+import cats.data.Validated
 
 import scala.collection.immutable.HashMap
 
@@ -207,7 +203,7 @@ object HasQuery {
 
           val obj = new qm.ObjM[M, A] {
             def apply[R](
-              cont: Query[A] => Lookup[A, R]): Lookup[Api, M#Wrap[R]] = {
+              cont: Query[A] => Lookup[A, R]): Lookup[Api, M#Coll[R]] = {
 
               val subLookup: Lookup[A, R] = cont(recurQuery.query)
 
@@ -219,7 +215,7 @@ object HasQuery {
                   ))
 
               def doResp(
-                resp: Response[Api]): Validated[LookupError, M#Wrap[R]] =
+                resp: Response[Api]): Validated[LookupError, M#Coll[R]] =
                 selector(respRepr.to(resp)) match {
                   case None =>
                     Validated.Invalid(
@@ -228,14 +224,13 @@ object HasQuery {
                   case Some(respA) =>
                     multOps.traversable
                       .traverse[Validated[LookupError, ?], Response[A], R](
-                        respA.it)(subLookup.handleResponse)
-                      .map(multOps.wrap)
+                        respA)(subLookup.handleResponse)
                       // We mark the lower errors with an "object group
                       // name" forming a trie of errors
                       .leftMap(LookupError.Object(kWitness.value, _))
                 }
 
-              Lookup[Api, M#Wrap[R]](request, doResp)
+              Lookup[Api, M#Coll[R]](request, doResp)
             }
           }
 

@@ -19,11 +19,10 @@ object Api {
   val fetcher: Fetcher[Id, Api] =
     Api[Fm](
       getUser = (id: User.Identity) => User.fetch(id),
-      getAllUsers = Multiplicity.Collection.Wrap(
-        List(
-          User.fetch(User.Default),
-          User.fetch(User.JosephAbrahamson)
-        ))
+      getAllUsers = List(
+        User.fetch(User.Default),
+        User.fetch(User.JosephAbrahamson)
+      )
     )
 
   val q: Query[Api] =

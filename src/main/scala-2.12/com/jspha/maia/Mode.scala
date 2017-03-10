@@ -10,7 +10,7 @@ trait Mode {
   type Atom[A]
   type IndexedAtom[I, A]
 
-  type Obj[A[_ <: Mode]]
+  type Obj[A[_ <: Mode]] = ObjM[Multiplicity.Singular, A]
   type ObjM[M <: Multiplicity, A[_ <: Mode]]
   type IndexedObj[I, A[_ <: Mode]]
 }

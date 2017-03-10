@@ -11,44 +11,27 @@ import scala.language.higherKinds
 
 sealed trait Multiplicity {
   type Coll[_]
-  case class Wrap[A](it: Coll[A])
 }
 
 object Multiplicity {
 
+  sealed trait Singular extends Multiplicity { type Coll[A] = A }
+  sealed trait Optional extends Multiplicity { type Coll[A] = Option[A] }
+  sealed trait Collection extends Multiplicity { type Coll[A] = List[A] }
+
   trait Ops[M <: Multiplicity] {
     val traversable: Traverse[M#Coll]
-    def wrap[A](a: M#Coll[A]): M#Wrap[A]
   }
 
-  sealed trait Singular extends Multiplicity {
-    type Coll[A] = A
-  }
-  object Singular extends Singular
-
-  implicit val SingularOps: Ops[Singular] = new Ops[Singular] {
-    val traversable: Traverse[Singular#Coll] = Traverse[Singular#Coll]
-    def wrap[A](a: A): Singular#Wrap[A] = Singular.Wrap(a)
+  object Ops {
+    def apply[M <: Multiplicity](implicit T: Traverse[M#Coll]): Ops[M] =
+      new Ops[M] {
+        val traversable: Traverse[M#Coll] = T
+      }
   }
 
-  sealed trait Optional extends Multiplicity {
-    type Coll[A] = Option[A]
-  }
-  object Optional extends Optional
-
-  implicit val OptionalOps: Ops[Optional] = new Ops[Optional] {
-    val traversable: Traverse[Optional#Coll] = Traverse[Optional#Coll]
-    def wrap[A](a: Option[A]): Optional#Wrap[A] = Optional.Wrap(a)
-  }
-
-  sealed trait Collection extends Multiplicity {
-    type Coll[A] = List[A]
-  }
-  object Collection extends Collection
-
-  implicit val CollectionOps: Ops[Collection] = new Ops[Collection] {
-    val traversable: Traverse[Collection#Coll] = Traverse[Collection#Coll]
-    def wrap[A](a: List[A]): Collection#Wrap[A] = Collection.Wrap(a)
-  }
+  implicit val SingularOps: Ops[Singular] = Ops[Singular]
+  implicit val OptionalOps: Ops[Optional] = Ops[Optional]
+  implicit val CollectionOps: Ops[Collection] = Ops[Collection]
 
 }
