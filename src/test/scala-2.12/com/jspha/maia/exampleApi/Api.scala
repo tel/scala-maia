@@ -14,7 +14,7 @@ final case class Api[M <: Mode](
 
 object Api {
 
-  type Fm = FetcherMode[Id]
+  type Fm = Mode.Fetcher[Id]
 
   val fetcher: Fetcher[Id, Api] =
     Api[Fm](

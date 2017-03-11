@@ -16,3 +16,12 @@ trait Mode {
   type IObj1[I, A[_ <: Mode]] = IObj[I, Cardinality.One, A]
   type IObj[I, M <: Cardinality, A[_ <: Mode]]
 }
+
+object Mode {
+
+  type Fetcher[F[_]] = modes.Fetcher[F]
+  type Query[S[_ <: Mode]] = modes.Query[S]
+  type Request = modes.Request
+  type Response = modes.Response
+
+}

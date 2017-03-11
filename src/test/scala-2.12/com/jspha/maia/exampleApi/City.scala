@@ -14,7 +14,7 @@ final case class City[M <: Mode](
 
 object City {
 
-  type Fm = FetcherMode[Id]
+  type Fm = Mode.Fetcher[Id]
 
   def atlanta: Fetcher[Id, City] =
     City[Fm](

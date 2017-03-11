@@ -8,12 +8,9 @@ import scala.language.higherKinds
 
 package object maia {
 
-  type RequestMode = RequestMode.type
-  type ResponseMode = ResponseMode.type
-
-  type Request[A[_ <: Mode]] = A[RequestMode]
-  type Response[A[_ <: Mode]] = A[ResponseMode]
-  type Query[A[_ <: Mode]] = A[QueryMode[A]]
-  type Fetcher[M[_], A[_ <: Mode]] = A[FetcherMode[M]]
+  type Request[A[_ <: Mode]] = A[Mode.Request]
+  type Response[A[_ <: Mode]] = A[Mode.Response]
+  type Query[A[_ <: Mode]] = A[Mode.Query[A]]
+  type Fetcher[M[_], A[_ <: Mode]] = A[Mode.Fetcher[M]]
 
 }

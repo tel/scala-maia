@@ -50,10 +50,11 @@ object Interprets {
                                  TResp <: HList](
       implicit rWorker: Worker[M, TI, TReq, TResp]
     ): Worker[M,
-              FetcherMode[M]#Atom[A] :: TI,
-              RequestMode.Atom[A] :: TReq,
-              ResponseMode.Atom[A] :: TResp] = {
-      (ii: FetcherMode[M]#Atom[A] :: TI, rr: RequestMode.Atom[A] :: TReq) =>
+              modes.Fetcher[M]#Atom[A] :: TI,
+              modes.Request.Atom[A] :: TReq,
+              modes.Response.Atom[A] :: TResp] = {
+      (ii: modes.Fetcher[M]#Atom[A] :: TI,
+       rr: modes.Request.Atom[A] :: TReq) =>
         {
           val M = Monad[M]
 
@@ -79,11 +80,11 @@ object Interprets {
                                         TResp <: HList](
       implicit rWorker: Worker[M, TI, TReq, TResp]
     ): Worker[M,
-              FetcherMode[M]#IAtom[I, A] :: TI,
-              RequestMode.IAtom[I, A] :: TReq,
-              ResponseMode.IAtom[I, A] :: TResp] = {
-      (ii: FetcherMode[M]#IAtom[I, A] :: TI,
-       rr: RequestMode.IAtom[I, A] :: TReq) =>
+              modes.Fetcher[M]#IAtom[I, A] :: TI,
+              modes.Request.IAtom[I, A] :: TReq,
+              modes.Response.IAtom[I, A] :: TResp] = {
+      (ii: modes.Fetcher[M]#IAtom[I, A] :: TI,
+       rr: modes.Request.IAtom[I, A] :: TReq) =>
         {
           val M = Monad[M]
 
@@ -113,11 +114,11 @@ object Interprets {
       multOps: Cardinality.Ops[M],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#Obj[M, A] :: TI,
-              RequestMode.Obj[M, A] :: TReq,
-              ResponseMode.Obj[M, A] :: TResp] =
-      (ii: FetcherMode[F]#Obj[M, A] :: TI,
-       rr: RequestMode.Obj[M, A] :: TReq) => {
+              modes.Fetcher[F]#Obj[M, A] :: TI,
+              modes.Request.Obj[M, A] :: TReq,
+              modes.Response.Obj[M, A] :: TResp] =
+      (ii: modes.Fetcher[F]#Obj[M, A] :: TI,
+       rr: modes.Request.Obj[M, A] :: TReq) => {
         val F = Monad[F]
 
         (ii, rr) match {
@@ -150,9 +151,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#Obj[Cardinality.One, A] :: TI,
-              RequestMode.Obj[Cardinality.One, A] :: TReq,
-              ResponseMode.Obj[Cardinality.One, A] :: TResp] =
+              modes.Fetcher[F]#Obj[Cardinality.One, A] :: TI,
+              modes.Request.Obj[Cardinality.One, A] :: TReq,
+              modes.Response.Obj[Cardinality.One, A] :: TResp] =
       buildWorkerRecurObjM[F, A, Cardinality.One, TI, TReq, TResp]
 
     implicit def WorkerRecurObjOptional[F[_]: Monad,
@@ -163,9 +164,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#Obj[Cardinality.Opt, A] :: TI,
-              RequestMode.Obj[Cardinality.Opt, A] :: TReq,
-              ResponseMode.Obj[Cardinality.Opt, A] :: TResp] =
+              modes.Fetcher[F]#Obj[Cardinality.Opt, A] :: TI,
+              modes.Request.Obj[Cardinality.Opt, A] :: TReq,
+              modes.Response.Obj[Cardinality.Opt, A] :: TResp] =
       buildWorkerRecurObjM[F, A, Cardinality.Opt, TI, TReq, TResp]
 
     implicit def WorkerRecurObjCollection[F[_]: Monad,
@@ -176,9 +177,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#Obj[Cardinality.Many, A] :: TI,
-              RequestMode.Obj[Cardinality.Many, A] :: TReq,
-              ResponseMode.Obj[Cardinality.Many, A] :: TResp] =
+              modes.Fetcher[F]#Obj[Cardinality.Many, A] :: TI,
+              modes.Request.Obj[Cardinality.Many, A] :: TReq,
+              modes.Response.Obj[Cardinality.Many, A] :: TResp] =
       buildWorkerRecurObjM[F, A, Cardinality.Many, TI, TReq, TResp]
 
     def buildWorkerRecurIndexedObjM[F[_]: Monad,
@@ -192,11 +193,11 @@ object Interprets {
       multOps: Cardinality.Ops[M],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#IObj[I, M, A] :: TI,
-              RequestMode.IObj[I, M, A] :: TReq,
-              ResponseMode.IObj[I, M, A] :: TResp] =
-      (ii: FetcherMode[F]#IObj[I, M, A] :: TI,
-       rr: RequestMode.IObj[I, M, A] :: TReq) => {
+              modes.Fetcher[F]#IObj[I, M, A] :: TI,
+              modes.Request.IObj[I, M, A] :: TReq,
+              modes.Response.IObj[I, M, A] :: TResp] =
+      (ii: modes.Fetcher[F]#IObj[I, M, A] :: TI,
+       rr: modes.Request.IObj[I, M, A] :: TReq) => {
         val F = Monad[F]
 
         (ii, rr) match {
@@ -224,9 +225,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#IObj[I, Cardinality.One, A] :: TI,
-              RequestMode.IObj[I, Cardinality.One, A] :: TReq,
-              ResponseMode.IObj[I, Cardinality.One, A] ::
+              modes.Fetcher[F]#IObj[I, Cardinality.One, A] :: TI,
+              modes.Request.IObj[I, Cardinality.One, A] :: TReq,
+              modes.Response.IObj[I, Cardinality.One, A] ::
                 TResp] =
       buildWorkerRecurIndexedObjM[F, A, I, Cardinality.One, TI, TReq, TResp]
 
@@ -239,9 +240,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#IObj[I, Cardinality.Opt, A] :: TI,
-              RequestMode.IObj[I, Cardinality.Opt, A] :: TReq,
-              ResponseMode.IObj[I, Cardinality.Opt, A] ::
+              modes.Fetcher[F]#IObj[I, Cardinality.Opt, A] :: TI,
+              modes.Request.IObj[I, Cardinality.Opt, A] :: TReq,
+              modes.Response.IObj[I, Cardinality.Opt, A] ::
                 TResp] =
       buildWorkerRecurIndexedObjM[F, A, I, Cardinality.Opt, TI, TReq, TResp]
 
@@ -254,9 +255,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#IObj[I, Cardinality.Many, A] :: TI,
-              RequestMode.IObj[I, Cardinality.Many, A] :: TReq,
-              ResponseMode.IObj[I, Cardinality.Many, A] ::
+              modes.Fetcher[F]#IObj[I, Cardinality.Many, A] :: TI,
+              modes.Request.IObj[I, Cardinality.Many, A] :: TReq,
+              modes.Response.IObj[I, Cardinality.Many, A] ::
                 TResp] =
       buildWorkerRecurIndexedObjM[F, A, I, Cardinality.Many, TI, TReq, TResp]
 

@@ -20,7 +20,7 @@ object User {
   case object Root extends Identity
   case object JosephAbrahamson extends Identity
 
-  type Fm = FetcherMode[Id]
+  type Fm = Mode.Fetcher[Id]
 
   def fetch(id: Identity): Fetcher[Id, User] = id match {
     case Root =>
