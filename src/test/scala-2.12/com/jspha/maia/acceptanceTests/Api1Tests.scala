@@ -5,32 +5,33 @@
 package com.jspha.maia.acceptanceTests
 
 import com.jspha.maia._
-import com.jspha.maia.exampleApi._
+import com.jspha.maia.examples.api1._
 import cats.data._
 import cats.implicits._
 import utest._
 import utest.framework.{Test, Tree}
 
-object ApiLookupTests extends TestSuite {
+object Api1Tests extends TestSuite {
 
-  val lkUserNames: Lookup[Api, List[String]] =
-    Api.q.getAllUsers { user =>
+  val lkUserNames: Lookup[TopLevel, Err, List[String]] =
+    TopLevel.q.getAllUsers { user =>
       user.name
     }
 
-  val lkUserNameAge: Lookup[Api, (String, Int)] =
-    Api.q.getUser(User.JosephAbrahamson) { user =>
+  val lkUserNameAge: Lookup[TopLevel, Err, (String, Int)] =
+    TopLevel.q.getUser(User.JosephAbrahamson) { user =>
       (user.name |@| user.age).tupled
     }
 
-  def runLookup[R](l: Lookup[Api, R]): Validated[LookupError, R] =
-    l.handleResponse(Api.i(Api.fetcher, l.request))
+  def runLookup[R](
+    l: Lookup[TopLevel, Err, R]): Validated[LookupError[Err], R] =
+    l.handleResponse(TopLevel.i(TopLevel.fetcher, l.request))
 
   val tests: Tree[Test] = this {
 
     'lkUserNameAge {
 
-      val result: Validated[LookupError, (String, Int)] =
+      val result: Validated[LookupError[Err], (String, Int)] =
         runLookup(lkUserNameAge)
 
       'success {

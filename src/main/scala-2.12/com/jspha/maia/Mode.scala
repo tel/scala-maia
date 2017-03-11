@@ -22,29 +22,38 @@ sealed trait Mode {
 
 object Mode {
 
-  final class Fetcher[F[_]] extends Mode {
-    type Atom[A] = F[A]
-    type IAtom[I, A] = I => F[A]
+  final class Fetcher[F[_], E] extends Mode {
+    type Atom[A] = F[Either[E, A]]
+    type IAtom[I, A] = I => F[Either[E, A]]
     type Obj[M <: Cardinality, Api[_ <: Mode]] =
-      F[M#Coll[maia.Fetcher[F, Api]]]
+      F[Either[E, M#Coll[maia.Fetcher[F, E, Api]]]]
     type IObj[I, M <: Cardinality, Api[_ <: Mode]] =
-      I => F[M#Coll[maia.Fetcher[F, Api]]]
+      I => F[Either[E, M#Coll[maia.Fetcher[F, E, Api]]]]
   }
 
-  final class Query[Super[_ <: Mode]] extends Mode {
+  final class Query[Super[_ <: Mode], E] extends Mode {
 
-    type Atom[A] = Lookup[Super, A]
-    type IAtom[I, A] = I => Lookup[Super, A]
+    type Atom[A] = Lookup[Super, E, A]
+    type IAtom[I, A] = I => Lookup[Super, E, A]
 
     trait Obj[M <: Cardinality, Sub[_ <: Mode]] {
-      def apply[R](
-        cont: maia.Query[Sub] => Lookup[Sub, R]): Lookup[Super, M#Coll[R]]
+      def apply[R](cont: maia.Query[E, Sub] => Lookup[Sub, E, R])
+        : Lookup[Super, E, M#Coll[R]]
     }
 
     trait IObj[I, M <: Cardinality, Sub[_ <: Mode]] {
-      def apply[R](ix: I)(
-        cont: maia.Query[Sub] => Lookup[Sub, R]): Lookup[Super, M#Coll[R]]
+      def apply[R](ix: I)(cont: maia.Query[E, Sub] => Lookup[Sub, E, R])
+        : Lookup[Super, E, M#Coll[R]]
     }
+  }
+
+  final class Response[E] extends maia.Mode {
+    type Atom[A] = Option[Either[E, A]]
+    type IAtom[I, A] = HashMap[I, Either[E, A]]
+    type Obj[M <: maia.Cardinality, A[_ <: maia.Mode]] =
+      Option[Either[E, M#Coll[maia.Response[E, A]]]]
+    type IObj[I, M <: maia.Cardinality, A[_ <: maia.Mode]] =
+      HashMap[I, Either[E, M#Coll[maia.Response[E, A]]]]
   }
 
   sealed trait Request extends maia.Mode {
@@ -57,16 +66,5 @@ object Mode {
   }
 
   object Request extends Request
-
-  sealed trait Response extends maia.Mode {
-    type Atom[A] = Option[A]
-    type IAtom[I, A] = HashMap[I, A]
-    type Obj[M <: maia.Cardinality, A[_ <: maia.Mode]] =
-      Option[M#Coll[maia.Response[A]]]
-    type IObj[I, M <: maia.Cardinality, A[_ <: maia.Mode]] =
-      HashMap[I, M#Coll[maia.Response[A]]]
-  }
-
-  object Response extends Response
 
 }

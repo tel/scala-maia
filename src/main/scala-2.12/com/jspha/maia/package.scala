@@ -9,8 +9,8 @@ import scala.language.higherKinds
 package object maia {
 
   type Request[A[_ <: Mode]] = A[Mode.Request]
-  type Response[A[_ <: Mode]] = A[Mode.Response]
-  type Query[A[_ <: Mode]] = A[Mode.Query[A]]
-  type Fetcher[M[_], A[_ <: Mode]] = A[Mode.Fetcher[M]]
+  type Response[E, A[_ <: Mode]] = A[Mode.Response[E]]
+  type Query[E, A[_ <: Mode]] = A[Mode.Query[A, E]]
+  type Fetcher[M[_], E, A[_ <: Mode]] = A[Mode.Fetcher[M, E]]
 
 }

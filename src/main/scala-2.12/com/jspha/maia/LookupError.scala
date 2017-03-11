@@ -6,7 +6,9 @@ package com.jspha.maia
 
 import cats.Semigroup
 
-sealed trait LookupError
+sealed trait LookupError[+E] {
+  def map[F](f: E => F): LookupError[F]
+}
 
 object LookupError {
 
@@ -15,23 +17,32 @@ object LookupError {
     * parallel branches of a `Lookup`. These errors are collected all
     * together so that error reports are complete.
     */
-  final case class Parallel(left: LookupError, right: LookupError)
-      extends LookupError
+  final case class Parallel[E](left: LookupError[E], right: LookupError[E])
+      extends LookupError[E] {
+    def map[F](f: (E) => F): LookupError[F] =
+      copy(left = left.map(f), right = right.map(f))
+  }
 
   /***
     * Having the `Paralell` error type enables `LookupError` to form a
     * `Semigroup` and, subsequently, collect errors with `Validated`.
     */
-  implicit def LookupErrorIsSemiGroup: Semigroup[LookupError] =
-    (x: LookupError, y: LookupError) => Parallel(x, y)
+  implicit def LookupErrorIsSemiGroup[E]: Semigroup[LookupError[E]] =
+    (x: LookupError[E], y: LookupError[E]) => Parallel(x, y)
 
   /***
     * When a `LookupError` arises in an object lookup we collect those errors
     * and mark them with the object where they fail. In aggregate, this forms
     * a trie of errors.
     */
-  final case class Object(key: Symbol, subError: LookupError)
-      extends LookupError
+  final case class Object[E](key: Symbol, subError: LookupError[E])
+      extends LookupError[E] {
+    def map[F](f: (E) => F): LookupError[F] = copy(subError = subError.map(f))
+  }
+
+  final case class LocalError[E](err: E) extends LookupError[E] {
+    def map[F](f: (E) => F): LookupError[F] = copy(err = f(err))
+  }
 
   /***
     * Unexpected errors are those which arise out of a guarantee broken by
@@ -39,7 +50,10 @@ object LookupError {
     * necessarily. If one of these arises in your code, please leave an Issue
     * on the repo---it is a bug.
     */
-  final case class Unexpected(err: UnexpectedError) extends LookupError
+  final case class Unexpected(err: UnexpectedError)
+      extends LookupError[Nothing] {
+    def map[F](f: (Nothing) => F): LookupError[F] = copy()
+  }
 
   sealed trait UnexpectedError
 
