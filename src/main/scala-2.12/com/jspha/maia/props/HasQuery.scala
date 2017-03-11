@@ -49,12 +49,12 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, modes.Request#Atom[A]],
+                           FieldType[K, Mode.Request#Atom[A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, modes.Response#Atom[A]]
-    ): Worker[FieldType[K, modes.Query[Api]#Atom[A]] :: T] =
-      new Worker[FieldType[K, modes.Query[Api]#Atom[A]] :: T] {
+      selector: Selector.Aux[RespRepr, K, Mode.Response#Atom[A]]
+    ): Worker[FieldType[K, Mode.Query[Api]#Atom[A]] :: T] =
+      new Worker[FieldType[K, Mode.Query[Api]#Atom[A]] :: T] {
 
         val request: Request[Api] =
           reqRepr.from(
@@ -73,7 +73,7 @@ object HasQuery {
         val lookup: Lookup[Api, A] =
           Lookup[Api, A](request, handleResponse)
 
-        val query: FieldType[K, modes.Query[Api]#Atom[A]] :: T =
+        val query: FieldType[K, Mode.Query[Api]#Atom[A]] :: T =
           field[K](lookup) :: recur.query
 
       }
@@ -90,12 +90,12 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, modes.Request#IAtom[I, A]],
+                           FieldType[K, Mode.Request#IAtom[I, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, modes.Response#IAtom[I, A]]
-    ): Worker[FieldType[K, modes.Query[Api]#IAtom[I, A]] :: T] =
-      new Worker[FieldType[K, modes.Query[Api]#IAtom[I, A]] :: T] {
+      selector: Selector.Aux[RespRepr, K, Mode.Response#IAtom[I, A]]
+    ): Worker[FieldType[K, Mode.Query[Api]#IAtom[I, A]] :: T] =
+      new Worker[FieldType[K, Mode.Query[Api]#IAtom[I, A]] :: T] {
 
         def lookup(ix: I): Lookup[Api, A] = {
 
@@ -116,7 +116,7 @@ object HasQuery {
           Lookup[Api, A](request, handleResponse)
         }
 
-        val query: FieldType[K, modes.Query[Api]#IAtom[I, A]] :: T =
+        val query: FieldType[K, Mode.Query[Api]#IAtom[I, A]] :: T =
           field[K](lookup _) :: recur.query
 
       }
@@ -133,18 +133,18 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, modes.Request#Obj[M, A]],
+                           FieldType[K, Mode.Request#Obj[M, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, modes.Response#Obj[M, A]],
+      selector: Selector.Aux[RespRepr, K, Mode.Response#Obj[M, A]],
       multOps: Cardinality.Ops[M],
       recurQuery: HasQuery[A]
-    ): Worker[FieldType[K, modes.Query[Api]#Obj[M, A]] :: T] =
-      new Worker[FieldType[K, modes.Query[Api]#Obj[M, A]] :: T] {
+    ): Worker[FieldType[K, Mode.Query[Api]#Obj[M, A]] :: T] =
+      new Worker[FieldType[K, Mode.Query[Api]#Obj[M, A]] :: T] {
 
-        val qm: modes.Query[Api] = new modes.Query[Api]
+        val qm: Mode.Query[Api] = new Mode.Query[Api]
 
-        val query: FieldType[K, modes.Query[Api]#Obj[M, A]] :: T = {
+        val query: FieldType[K, Mode.Query[Api]#Obj[M, A]] :: T = {
 
           val obj = new qm.Obj[M, A] {
             def apply[R](
@@ -196,18 +196,18 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, modes.Request#IObj[I, M, A]],
+                           FieldType[K, Mode.Request#IObj[I, M, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, modes.Response#IObj[I, M, A]],
+      selector: Selector.Aux[RespRepr, K, Mode.Response#IObj[I, M, A]],
       multOps: Cardinality.Ops[M],
       recurQuery: HasQuery[A]
-    ): Worker[FieldType[K, modes.Query[Api]#IObj[I, M, A]] :: T] =
-      new Worker[FieldType[K, modes.Query[Api]#IObj[I, M, A]] :: T] {
+    ): Worker[FieldType[K, Mode.Query[Api]#IObj[I, M, A]] :: T] =
+      new Worker[FieldType[K, Mode.Query[Api]#IObj[I, M, A]] :: T] {
 
-        val qm: modes.Query[Api] = new modes.Query[Api]
+        val qm: Mode.Query[Api] = new Mode.Query[Api]
 
-        val query: FieldType[K, modes.Query[Api]#IObj[I, M, A]] :: T = {
+        val query: FieldType[K, Mode.Query[Api]#IObj[I, M, A]] :: T = {
 
           val obj = new qm.IObj[I, M, A] {
 
