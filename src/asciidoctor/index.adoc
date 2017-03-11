@@ -1,0 +1,49 @@
+= Maia
+:source-highlighter: prettify
+
+_Very type-safe server/client APIs in a GraphQL-inspired style._
+
+== Why Maia
+
+With Maia, the shape of your API and its documentation are "just" a set of
+normal Scala case classes.
+
+Use Maia instead of REST to achieve
+
+- query aggregation minimizing the number of client-server roundtrips
+- very easy monotonic API evolution
+- type-rich interfaces that are close to your domain
+- minimally-sized server responses which return only information actually
+  needed by the client
+- avoidance of one-endpoint-per-view pathological API implementations
+
+Maia's types guarantee that servers and clients _agree_ upon the API and thus
+that clients cannot make a request that is not understood by the server and
+that servers cannot return a response that is not understood by the client.
+
+== Links
+
+- link:latest/api/com/jspha/maia/index.html[Api Docs (latest)]
+
+== Example
+
+[[example]]
+[source,scala]
+----
+final case class User[M <: Mode](
+  name: M#Atom[String],
+  age: M#Atom[Int],
+  hometown: M#Obj1[City],
+)
+
+final case class City[M <: Mode](
+  name: M#Atom[String],
+  population: M#Atom[Int],
+  mayor: M#Obj1[User]
+)
+
+final case class TopLevel[M <: Mode](
+  getUser: M#IObj1[UserId, User]
+)
+----
+

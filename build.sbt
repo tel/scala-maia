@@ -40,6 +40,9 @@ addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 testFrameworks +=
   new TestFramework("utest.runner.Framework")
 
+enablePlugins(SiteScaladocPlugin)
+enablePlugins(AsciidoctorPlugin)
+
 wartremoverErrors ++= Warts.allBut(
   Wart.Any,
   Wart.AsInstanceOf,
