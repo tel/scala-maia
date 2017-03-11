@@ -9,7 +9,7 @@ import cats._
 
 final case class Api[M <: Mode](
   getUser: M#IndexedObj[User.Identity, User],
-  getAllUsers: M#ObjM[Multiplicity.Collection, User]
+  getAllUsers: M#IndexedMultiObj[Int, Multiplicity.Collection, User]
 )
 
 object Api {
@@ -19,9 +19,10 @@ object Api {
   val fetcher: Fetcher[Id, Api] =
     Api[Fm](
       getUser = (id: User.Identity) => User.fetch(id),
-      getAllUsers = List(
-        User.fetch(User.Default),
-        User.fetch(User.JosephAbrahamson)
+      getAllUsers = (_: Int) =>
+        List(
+          User.fetch(User.Root),
+          User.fetch(User.JosephAbrahamson)
       )
     )
 

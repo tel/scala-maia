@@ -188,20 +188,20 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, RequestMode#ObjM[M, A]],
+                           FieldType[K, RequestMode#MultiObj[M, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, ResponseMode#ObjM[M, A]],
+      selector: Selector.Aux[RespRepr, K, ResponseMode#MultiObj[M, A]],
       multOps: Multiplicity.Ops[M],
       recurQuery: HasQuery[A]
-    ): Worker[FieldType[K, QueryMode[Api]#ObjM[M, A]] :: T] =
-      new Worker[FieldType[K, QueryMode[Api]#ObjM[M, A]] :: T] {
+    ): Worker[FieldType[K, QueryMode[Api]#MultiObj[M, A]] :: T] =
+      new Worker[FieldType[K, QueryMode[Api]#MultiObj[M, A]] :: T] {
 
         val qm: QueryMode[Api] = new QueryMode[Api]
 
-        val query: FieldType[K, QueryMode[Api]#ObjM[M, A]] :: T = {
+        val query: FieldType[K, QueryMode[Api]#MultiObj[M, A]] :: T = {
 
-          val obj = new qm.ObjM[M, A] {
+          val obj = new qm.MultiObj[M, A] {
             def apply[R](
               cont: Query[A] => Lookup[A, R]): Lookup[Api, M#Coll[R]] = {
 
@@ -291,6 +291,73 @@ object HasQuery {
                 }
 
               Lookup[Api, R](request, doResp)
+            }
+          }
+
+          field[K](obj) :: recur.query
+        }
+      }
+
+    implicit def WorkerRecurIndexedMultiObj[K <: Symbol,
+                                            ReqRepr <: HList,
+                                            RespRepr <: HList,
+                                            Api[_ <: Mode],
+                                            A[_ <: Mode],
+                                            I,
+                                            M <: Multiplicity,
+                                            T <: HList](
+      implicit recur: Worker[T],
+      kWitness: Witness.Aux[K],
+      buildNullRequest: NullRequest[Api],
+      reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
+      updater: Updater.Aux[ReqRepr,
+                           FieldType[K, RequestMode#IndexedMultiObj[I, M, A]],
+                           ReqRepr],
+      respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
+      selector: Selector.Aux[RespRepr,
+                             K,
+                             ResponseMode#IndexedMultiObj[I, M, A]],
+      multOps: Multiplicity.Ops[M],
+      recurQuery: HasQuery[A]
+    ): Worker[FieldType[K, QueryMode[Api]#IndexedMultiObj[I, M, A]] :: T] =
+      new Worker[FieldType[K, QueryMode[Api]#IndexedMultiObj[I, M, A]] :: T] {
+
+        val qm: QueryMode[Api] = new QueryMode[Api]
+
+        val query
+          : FieldType[K, QueryMode[Api]#IndexedMultiObj[I, M, A]] :: T = {
+
+          val obj = new qm.IndexedMultiObj[I, M, A] {
+            def apply[R](ix: I)(
+              cont: Query[A] => Lookup[A, R]): Lookup[Api, M#Coll[R]] = {
+
+              val subLookup: Lookup[A, R] =
+                cont(recurQuery.query)
+
+              val request: Request[Api] =
+                reqRepr.from(
+                  updater(
+                    reqRepr.to(buildNullRequest.request),
+                    field[K](HashMap(ix -> subLookup.request))
+                  ))
+
+              def doResp(
+                resp: Response[Api]): Validated[LookupError, M#Coll[R]] =
+                selector(respRepr.to(resp)).get(ix) match {
+                  case None =>
+                    Validated.Invalid(
+                      LookupError.Unexpected(LookupError.UnexpectedError
+                        .ServerShouldHaveResponded(kWitness.value)))
+                  case Some(respA) =>
+                    multOps.traversable
+                      .traverse[Validated[LookupError, ?], Response[A], R](
+                        respA)(subLookup.handleResponse)
+                      // We mark the lower errors with an "object group
+                      // name" forming a trie of errors
+                      .leftMap(LookupError.Object(kWitness.value, _))
+                }
+
+              Lookup[Api, M#Coll[R]](request, doResp)
             }
           }
 

@@ -64,9 +64,9 @@ object NullRequest {
                                  K <: Symbol,
                                  T <: HList](
       implicit recur: Worker[T]
-    ): Worker[FieldType[K, RequestMode.ObjM[M, A]] :: T] =
-      new Worker[FieldType[K, RequestMode.ObjM[M, A]] :: T] {
-        val request: FieldType[K, RequestMode.ObjM[M, A]] :: T =
+    ): Worker[FieldType[K, RequestMode.MultiObj[M, A]] :: T] =
+      new Worker[FieldType[K, RequestMode.MultiObj[M, A]] :: T] {
+        val request: FieldType[K, RequestMode.MultiObj[M, A]] :: T =
           field[K](None) :: recur.request
       }
 
@@ -78,6 +78,18 @@ object NullRequest {
     ): Worker[FieldType[K, RequestMode.IndexedObj[I, A]] :: T] =
       new Worker[FieldType[K, RequestMode.IndexedObj[I, A]] :: T] {
         val request: FieldType[K, RequestMode.IndexedObj[I, A]] :: T =
+          field[K](HashMap.empty[I, Request[A]]) :: recur.request
+      }
+
+    implicit def WorkerRecurIndexedMultiObj[A[_ <: Mode],
+                                            I,
+                                            M <: Multiplicity,
+                                            K <: Symbol,
+                                            T <: HList](
+      implicit recur: Worker[T]
+    ): Worker[FieldType[K, RequestMode.IndexedMultiObj[I, M, A]] :: T] =
+      new Worker[FieldType[K, RequestMode.IndexedMultiObj[I, M, A]] :: T] {
+        val request: FieldType[K, RequestMode.IndexedMultiObj[I, M, A]] :: T =
           field[K](HashMap.empty[I, Request[A]]) :: recur.request
       }
 

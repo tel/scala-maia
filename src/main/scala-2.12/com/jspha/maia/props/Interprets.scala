@@ -145,11 +145,11 @@ object Interprets {
       multOps: Multiplicity.Ops[M],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#ObjM[M, A] :: TI,
-              RequestMode.ObjM[M, A] :: TReq,
-              ResponseMode.ObjM[M, A] :: TResp] =
-      (ii: FetcherMode[F]#ObjM[M, A] :: TI,
-       rr: RequestMode.ObjM[M, A] :: TReq) => {
+              FetcherMode[F]#MultiObj[M, A] :: TI,
+              RequestMode.MultiObj[M, A] :: TReq,
+              ResponseMode.MultiObj[M, A] :: TResp] =
+      (ii: FetcherMode[F]#MultiObj[M, A] :: TI,
+       rr: RequestMode.MultiObj[M, A] :: TReq) => {
         val F = Monad[F]
 
         (ii, rr) match {
@@ -182,9 +182,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#ObjM[Multiplicity.Singular, A] :: TI,
-              RequestMode.ObjM[Multiplicity.Singular, A] :: TReq,
-              ResponseMode.ObjM[Multiplicity.Singular, A] :: TResp] =
+              FetcherMode[F]#MultiObj[Multiplicity.Singular, A] :: TI,
+              RequestMode.MultiObj[Multiplicity.Singular, A] :: TReq,
+              ResponseMode.MultiObj[Multiplicity.Singular, A] :: TResp] =
       buildWorkerRecurObjM[F, A, Multiplicity.Singular, TI, TReq, TResp]
 
     implicit def WorkerRecurObjOptional[F[_]: Monad,
@@ -195,9 +195,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#ObjM[Multiplicity.Optional, A] :: TI,
-              RequestMode.ObjM[Multiplicity.Optional, A] :: TReq,
-              ResponseMode.ObjM[Multiplicity.Optional, A] :: TResp] =
+              FetcherMode[F]#MultiObj[Multiplicity.Optional, A] :: TI,
+              RequestMode.MultiObj[Multiplicity.Optional, A] :: TReq,
+              ResponseMode.MultiObj[Multiplicity.Optional, A] :: TResp] =
       buildWorkerRecurObjM[F, A, Multiplicity.Optional, TI, TReq, TResp]
 
     implicit def WorkerRecurObjCollection[F[_]: Monad,
@@ -208,9 +208,9 @@ object Interprets {
       implicit rWorker: Worker[F, TI, TReq, TResp],
       rObj: Interprets[F, A]
     ): Worker[F,
-              FetcherMode[F]#ObjM[Multiplicity.Collection, A] :: TI,
-              RequestMode.ObjM[Multiplicity.Collection, A] :: TReq,
-              ResponseMode.ObjM[Multiplicity.Collection, A] :: TResp] =
+              FetcherMode[F]#MultiObj[Multiplicity.Collection, A] :: TI,
+              RequestMode.MultiObj[Multiplicity.Collection, A] :: TReq,
+              ResponseMode.MultiObj[Multiplicity.Collection, A] :: TResp] =
       buildWorkerRecurObjM[F, A, Multiplicity.Collection, TI, TReq, TResp]
 
     implicit def WorkerRecurIndexedObj[M[_]: Monad,
@@ -233,8 +233,6 @@ object Interprets {
 
           (ii, rr) match {
             case (i :: is, r :: rs) =>
-              val i_ : I => M[Fetcher[M, A]] = i
-              val r_ : HashMap[I, Request[A]] = r
               val here: M[HashMap[I, Response[A]]] =
                 Foldable[Set].foldM(r.toSet, HashMap.empty[I, Response[A]]) {
                   case (map, (ix, subReq)) =>
@@ -250,6 +248,106 @@ object Interprets {
         }
 
     }
+
+    def buildWorkerRecurIndexedObjM[F[_]: Monad,
+                                    A[_ <: Mode],
+                                    I,
+                                    M <: Multiplicity,
+                                    TI <: HList,
+                                    TReq <: HList,
+                                    TResp <: HList](
+      implicit rWorker: Worker[F, TI, TReq, TResp],
+      multOps: Multiplicity.Ops[M],
+      rObj: Interprets[F, A]
+    ): Worker[F,
+              FetcherMode[F]#IndexedMultiObj[I, M, A] :: TI,
+              RequestMode.IndexedMultiObj[I, M, A] :: TReq,
+              ResponseMode.IndexedMultiObj[I, M, A] :: TResp] =
+      (ii: FetcherMode[F]#IndexedMultiObj[I, M, A] :: TI,
+       rr: RequestMode.IndexedMultiObj[I, M, A] :: TReq) => {
+        val F = Monad[F]
+
+        (ii, rr) match {
+          case (i :: is, r :: rs) =>
+            val here: F[HashMap[I, M#Coll[Response[A]]]] =
+              Foldable[Set].foldM(r.toSet,
+                                  HashMap.empty[I, M#Coll[Response[A]]]) {
+                case (map, (ix, subReq)) =>
+                  F.flatMap(i(ix)) { fetchers =>
+                      multOps.traversable.traverse(fetchers)(rObj(_, subReq))
+                    }
+                    .map(result => map + (ix -> result))
+              }
+            val there: F[TResp] = rWorker(is, rs)
+            F.map2(here, there)((h, t) => h :: t)
+        }
+      }
+
+    implicit def WorkerRecurMultiObjSingular[F[_]: Monad,
+                                             I,
+                                             A[_ <: Mode],
+                                             TI <: HList,
+                                             TReq <: HList,
+                                             TResp <: HList](
+      implicit rWorker: Worker[F, TI, TReq, TResp],
+      rObj: Interprets[F, A]
+    ): Worker[
+      F,
+      FetcherMode[F]#IndexedMultiObj[I, Multiplicity.Singular, A] :: TI,
+      RequestMode.IndexedMultiObj[I, Multiplicity.Singular, A] :: TReq,
+      ResponseMode.IndexedMultiObj[I, Multiplicity.Singular, A] ::
+        TResp] =
+      buildWorkerRecurIndexedObjM[F,
+                                  A,
+                                  I,
+                                  Multiplicity.Singular,
+                                  TI,
+                                  TReq,
+                                  TResp]
+
+    implicit def WorkerRecurMultiObjOptional[F[_]: Monad,
+                                             I,
+                                             A[_ <: Mode],
+                                             TI <: HList,
+                                             TReq <: HList,
+                                             TResp <: HList](
+      implicit rWorker: Worker[F, TI, TReq, TResp],
+      rObj: Interprets[F, A]
+    ): Worker[
+      F,
+      FetcherMode[F]#IndexedMultiObj[I, Multiplicity.Optional, A] :: TI,
+      RequestMode.IndexedMultiObj[I, Multiplicity.Optional, A] :: TReq,
+      ResponseMode.IndexedMultiObj[I, Multiplicity.Optional, A] ::
+        TResp] =
+      buildWorkerRecurIndexedObjM[F,
+                                  A,
+                                  I,
+                                  Multiplicity.Optional,
+                                  TI,
+                                  TReq,
+                                  TResp]
+
+    implicit def WorkerRecurMultiObjCollection[F[_]: Monad,
+                                               I,
+                                               A[_ <: Mode],
+                                               TI <: HList,
+                                               TReq <: HList,
+                                               TResp <: HList](
+      implicit rWorker: Worker[F, TI, TReq, TResp],
+      rObj: Interprets[F, A]
+    ): Worker[
+      F,
+      FetcherMode[F]#IndexedMultiObj[I, Multiplicity.Collection, A] :: TI,
+      RequestMode.IndexedMultiObj[I, Multiplicity.Collection, A] :: TReq,
+      ResponseMode.IndexedMultiObj[I, Multiplicity.Collection, A] ::
+        TResp] =
+      buildWorkerRecurIndexedObjM[F,
+                                  A,
+                                  I,
+                                  Multiplicity.Collection,
+                                  TI,
+                                  TReq,
+                                  TResp]
 
   }
 

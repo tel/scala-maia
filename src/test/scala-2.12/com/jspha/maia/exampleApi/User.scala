@@ -17,13 +17,13 @@ final case class User[M <: Mode](
 object User {
 
   sealed trait Identity
-  case object Default extends Identity
+  case object Root extends Identity
   case object JosephAbrahamson extends Identity
 
   type Fm = FetcherMode[Id]
 
   def fetch(id: Identity): Fetcher[Id, User] = id match {
-    case Default =>
+    case Root =>
       User[Fm](
         name = "Root",
         age = -1,

@@ -67,7 +67,7 @@ object MergeRequests {
                                  Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]
-    ): Worker[RequestMode.ObjM[M, A] :: Tail] =
+    ): Worker[RequestMode.MultiObj[M, A] :: Tail] =
       (ll: Option[Request[A]] :: Tail, rr: Option[Request[A]] :: Tail) =>
         (ll, rr) match {
           case (None :: ls, None :: rs) => None :: recur(ls, rs)
@@ -83,6 +83,24 @@ object MergeRequests {
     ): Worker[RequestMode.IndexedObj[I, A] :: Tail] =
       (ll: RequestMode.IndexedObj[I, A] :: Tail,
        rr: RequestMode.IndexedObj[I, A] :: Tail) =>
+        (ll, rr) match {
+          case (l :: ls, r :: rs) =>
+            val here: HashMap[I, Request[A]] = l.merged(r) { (lt, rt) =>
+              (lt._1, recurObj(lt._2, rt._2))
+            }
+            val there: Tail = recur(ls, rs)
+            here :: there
+      }
+
+    implicit def WorkerRecurIndexedMultiObj[A[_ <: Mode],
+                                            I,
+                                            M <: Multiplicity,
+                                            Tail <: HList](
+      implicit recur: Worker[Tail],
+      recurObj: MergeRequests[A]
+    ): Worker[RequestMode.IndexedMultiObj[I, M, A] :: Tail] =
+      (ll: RequestMode.IndexedMultiObj[I, M, A] :: Tail,
+       rr: RequestMode.IndexedMultiObj[I, M, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) =>
             val here: HashMap[I, Request[A]] = l.merged(r) { (lt, rt) =>

@@ -11,11 +11,16 @@ class QueryMode[Super[_ <: Mode]] extends Mode {
   type Atom[A] = Lookup[Super, A]
   type IndexedAtom[I, A] = I => Lookup[Super, A]
 
-  trait ObjM[M <: Multiplicity, Sub[_ <: Mode]] {
+  trait MultiObj[M <: Multiplicity, Sub[_ <: Mode]] {
     def apply[R](cont: Query[Sub] => Lookup[Sub, R]): Lookup[Super, M#Coll[R]]
   }
 
   trait IndexedObj[I, Sub[_ <: Mode]] {
     def apply[R](ix: I)(cont: Query[Sub] => Lookup[Sub, R]): Lookup[Super, R]
+  }
+
+  trait IndexedMultiObj[I, M <: Multiplicity, Sub[_ <: Mode]] {
+    def apply[R](ix: I)(
+      cont: Query[Sub] => Lookup[Sub, R]): Lookup[Super, M#Coll[R]]
   }
 }
