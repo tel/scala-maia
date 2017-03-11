@@ -4,17 +4,12 @@
 name := "maia"
 version := "1.0"
 scalaVersion := "2.12.1"
-scalaOrganization := "org.typelevel"
 scalacOptions ++= Seq(
   "-target:jvm-1.8",
   "-unchecked",
   "-deprecation",
   "-Yno-adapted-args",
-  "-Ywarn-numeric-widen",
-  // Typelevel flags...
-  "-Yinduction-heuristics",
-  "-Xlint:strict-unsealed-patmat",
-  "-Xexperimental"
+  "-Ywarn-numeric-widen"
 )
 licenses := Seq("MPLv2" -> url("http://mozilla.org/MPL/2.0/"))
 homepage := Some(url("http://github.com/tel/scala-maia"))

@@ -38,7 +38,8 @@ object Lookup {
         )
 
       def map[A, B](fa: Lookup[Api, A])(f: A => B): Lookup[Api, B] =
-        fa.copy(handleResponse = resp => fa.handleResponse(resp).map(f))
+        fa.copy[Api, B](
+          handleResponse = resp => fa.handleResponse(resp).map(f))
     }
 
 }
