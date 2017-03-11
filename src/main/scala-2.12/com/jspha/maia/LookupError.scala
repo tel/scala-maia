@@ -7,12 +7,17 @@ package com.jspha.maia
 import cats.Semigroup
 
 sealed trait LookupError[+E] {
+
+  /**
+    * Transforms the [[LookupError]] to correspond to a different domain error
+    * type.
+    */
   def map[F](f: E => F): LookupError[F]
 }
 
 object LookupError {
 
-  /***
+  /**
     * Errors occur in `Parallel` when unhandled errors exist along two
     * parallel branches of a `Lookup`. These errors are collected all
     * together so that error reports are complete.
@@ -23,14 +28,14 @@ object LookupError {
       copy(left = left.map(f), right = right.map(f))
   }
 
-  /***
+  /**
     * Having the `Paralell` error type enables `LookupError` to form a
     * `Semigroup` and, subsequently, collect errors with `Validated`.
     */
   implicit def LookupErrorIsSemiGroup[E]: Semigroup[LookupError[E]] =
     (x: LookupError[E], y: LookupError[E]) => Parallel(x, y)
 
-  /***
+  /**
     * When a `LookupError` arises in an object lookup we collect those errors
     * and mark them with the object where they fail. In aggregate, this forms
     * a trie of errors.
@@ -40,11 +45,14 @@ object LookupError {
     def map[F](f: (E) => F): LookupError[F] = copy(subError = subError.map(f))
   }
 
-  final case class LocalError[E](err: E) extends LookupError[E] {
+  /**
+    * A [[Domain]] [[LookupError]] is an error returned by the server.
+    */
+  final case class Domain[E](err: E) extends LookupError[E] {
     def map[F](f: (E) => F): LookupError[F] = copy(err = f(err))
   }
 
-  /***
+  /**
     * Unexpected errors are those which arise out of a guarantee broken by
     * the library. End users are not expected to be able to handle them
     * necessarily. If one of these arises in your code, please leave an Issue
@@ -59,7 +67,7 @@ object LookupError {
 
   object UnexpectedError {
 
-    /***
+    /**
       * This error is reported when the the server did not report *any*
       * response to a requested field. Since (a) servers are guaranteed to
       * reply somehow to all requested fields and (b) Lookup values are always

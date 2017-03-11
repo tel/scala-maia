@@ -70,7 +70,7 @@ object HasQuery {
                 LookupError.Unexpected(LookupError.UnexpectedError
                   .ServerShouldHaveResponded(kWitness.value)))
             case Some(Left(err)) =>
-              Validated.invalid(LookupError.LocalError(err))
+              Validated.invalid(LookupError.Domain(err))
             case Some(Right(a)) =>
               Validated.valid(a)
           }
@@ -119,7 +119,7 @@ object HasQuery {
                   LookupError.Unexpected(LookupError.UnexpectedError
                     .ServerShouldHaveResponded(kWitness.value)))
               case Some(Left(err)) =>
-                Validated.invalid(LookupError.LocalError(err))
+                Validated.invalid(LookupError.Domain(err))
               case Some(Right(a)) =>
                 Validated.valid(a)
             }
@@ -181,7 +181,7 @@ object HasQuery {
                       LookupError.Unexpected(LookupError.UnexpectedError
                         .ServerShouldHaveResponded(kWitness.value)))
                   case Some(Left(err)) =>
-                    Validated.Invalid(LookupError.LocalError(err))
+                    Validated.Invalid(LookupError.Domain(err))
                   case Some(Right(respA)) =>
                     multOps.traversable
                       .traverse[Validated[LookupError[E], ?],
@@ -250,7 +250,7 @@ object HasQuery {
                       LookupError.Unexpected(LookupError.UnexpectedError
                         .ServerShouldHaveResponded(kWitness.value)))
                   case Some(Left(err)) =>
-                    Validated.Invalid(LookupError.LocalError(err))
+                    Validated.Invalid(LookupError.Domain(err))
                   case Some(Right(respA)) =>
                     multOps.traversable
                       .traverse[Validated[LookupError[E], ?],

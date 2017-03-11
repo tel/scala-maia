@@ -9,14 +9,61 @@ import com.jspha.maia
 
 import scala.collection.immutable.HashMap
 
-sealed trait Mode {
+/**
+  * A [[Mode]] is a type signature providing meaning for the various types of
+  * field-lookups available in an Api.
+  */
+trait Mode {
+
+  /**
+    * [[Atom]] describes a field which returns a value atomically---no
+    * further query is run against the returned value, it's returned wholesale.
+    * @tparam A Return type of this field lookup
+    */
   type Atom[A]
+
+  /**
+    * [[IAtom]] describes an atomic field that is indexed by a single
+    * argument. This argument *must* be provided in order to qualify which
+    * value is returned
+    * @tparam I Index or "argument" to the field
+    * @tparam A Return type of this field lookup
+    */
   type IAtom[I, A]
 
+  /**
+    * [[Obj1]] describes a field returning a single "object" which supports
+    * sub-querying.
+    * @tparam A Api-schema of the returned "object" values
+    */
   type Obj1[A[_ <: Mode]] = Obj[Cardinality.One, A]
+
+  /**
+    * [[Obj]] describes a generic "object" field much like [[Obj1]] but it
+    * also supports a choice of [[Cardinality]] of the set of object
+    * responses returned.
+    * @tparam M [[Cardinality]] of the set of objects returned by this field
+    *          lookup
+    * @tparam A Api-schema of the returned "object" values
+    */
   type Obj[M <: Cardinality, A[_ <: Mode]]
 
+  /**
+    * [[IObj1]] is similar to [[Obj1]] but allows for indexing or
+    * parameterization of the field lookup
+    * @tparam I The index or "argument" to this field lookup
+    * @tparam A Api-schema of the returned "object" values
+    */
   type IObj1[I, A[_ <: Mode]] = IObj[I, Cardinality.One, A]
+
+  /**
+    * [[IObj]] is similar to [[Obj]] but allows for indexing or
+    * parameterization of the field lookup
+    * @tparam I The index or "argument" to this field lookup
+    * @tparam M [[Cardinality]] of the set of objects returned by this field
+    *          lookup
+    * @tparam A Api-schema of the returned "object" values
+    */
   type IObj[I, M <: Cardinality, A[_ <: Mode]]
 }
 
