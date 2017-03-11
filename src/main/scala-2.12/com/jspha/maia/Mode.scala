@@ -8,11 +8,11 @@ import scala.language.higherKinds
 
 trait Mode {
   type Atom[A]
-  type IndexedAtom[I, A]
+  type IAtom[I, A]
 
-  type Obj[A[_ <: Mode]] = MultiObj[Multiplicity.Singular, A]
-  type MultiObj[M <: Multiplicity, A[_ <: Mode]]
+  type Obj1[A[_ <: Mode]] = Obj[Cardinality.One, A]
+  type Obj[M <: Cardinality, A[_ <: Mode]]
 
-  type IndexedObj[I, A[_ <: Mode]]
-  type IndexedMultiObj[I, M <: Multiplicity, A[_ <: Mode]]
+  type IObj1[I, A[_ <: Mode]] = IObj[I, Cardinality.One, A]
+  type IObj[I, M <: Cardinality, A[_ <: Mode]]
 }

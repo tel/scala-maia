@@ -9,9 +9,8 @@ import scala.language.higherKinds
 
 object RequestMode extends Mode {
   type Atom[A] = Boolean
-  type IndexedAtom[I, A] = Set[I]
-  type MultiObj[M <: Multiplicity, A[_ <: Mode]] = Option[Request[A]]
-  type IndexedObj[I, A[_ <: Mode]] = HashMap[I, Request[A]]
-  type IndexedMultiObj[I, M <: Multiplicity, A[_ <: Mode]] =
+  type IAtom[I, A] = Set[I]
+  type Obj[M <: Cardinality, A[_ <: Mode]] = Option[Request[A]]
+  type IObj[I, M <: Cardinality, A[_ <: Mode]] =
     HashMap[I, Request[A]]
 }

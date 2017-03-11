@@ -9,9 +9,8 @@ import scala.language.higherKinds
 
 object ResponseMode extends Mode {
   type Atom[A] = Option[A]
-  type IndexedAtom[I, A] = HashMap[I, A]
-  type MultiObj[M <: Multiplicity, A[_ <: Mode]] = Option[M#Coll[Response[A]]]
-  type IndexedObj[I, A[_ <: Mode]] = HashMap[I, Response[A]]
-  type IndexedMultiObj[I, M <: Multiplicity, A[_ <: Mode]] =
+  type IAtom[I, A] = HashMap[I, A]
+  type Obj[M <: Cardinality, A[_ <: Mode]] = Option[M#Coll[Response[A]]]
+  type IObj[I, M <: Cardinality, A[_ <: Mode]] =
     HashMap[I, M#Coll[Response[A]]]
 }

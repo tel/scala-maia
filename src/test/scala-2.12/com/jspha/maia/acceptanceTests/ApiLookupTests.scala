@@ -14,7 +14,7 @@ import utest.framework.{Test, Tree}
 object ApiLookupTests extends TestSuite {
 
   val lkUserNames: Lookup[Api, List[String]] =
-    Api.q.getAllUsers(10) { user =>
+    Api.q.getAllUsers { user =>
       user.name
     }
 

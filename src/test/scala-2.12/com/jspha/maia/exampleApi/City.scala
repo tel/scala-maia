@@ -9,7 +9,7 @@ import cats._
 
 final case class City[M <: Mode](
   name: M#Atom[String],
-  location: M#Obj[Location]
+  location: M#Obj1[Location]
 )
 
 object City {

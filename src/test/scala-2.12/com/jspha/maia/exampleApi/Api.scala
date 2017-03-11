@@ -8,8 +8,8 @@ import com.jspha.maia._
 import cats._
 
 final case class Api[M <: Mode](
-  getUser: M#IndexedObj[User.Identity, User],
-  getAllUsers: M#IndexedMultiObj[Int, Multiplicity.Collection, User]
+  getUser: M#IObj1[User.Identity, User],
+  getAllUsers: M#Obj[Cardinality.Many, User]
 )
 
 object Api {
@@ -19,10 +19,9 @@ object Api {
   val fetcher: Fetcher[Id, Api] =
     Api[Fm](
       getUser = (id: User.Identity) => User.fetch(id),
-      getAllUsers = (_: Int) =>
-        List(
-          User.fetch(User.Root),
-          User.fetch(User.JosephAbrahamson)
+      getAllUsers = List(
+        User.fetch(User.Root),
+        User.fetch(User.JosephAbrahamson)
       )
     )
 

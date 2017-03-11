@@ -8,9 +8,8 @@ import scala.language.higherKinds
 
 class FetcherMode[F[_]] extends Mode {
   type Atom[A] = F[A]
-  type IndexedAtom[I, A] = I => F[A]
-  type MultiObj[M <: Multiplicity, Api[_ <: Mode]] = F[M#Coll[Fetcher[F, Api]]]
-  type IndexedObj[I, Api[_ <: Mode]] = I => F[Fetcher[F, Api]]
-  type IndexedMultiObj[I, M <: Multiplicity, Api[_ <: Mode]] =
+  type IAtom[I, A] = I => F[A]
+  type Obj[M <: Cardinality, Api[_ <: Mode]] = F[M#Coll[Fetcher[F, Api]]]
+  type IObj[I, M <: Cardinality, Api[_ <: Mode]] =
     I => F[M#Coll[Fetcher[F, Api]]]
 }
