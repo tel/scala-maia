@@ -4,6 +4,8 @@
 
 package com.jspha.maia.exampleApi
 
+import scala.language.higherKinds
+
 import com.jspha.maia._
 import cats._
 
@@ -14,10 +16,8 @@ final case class Api[M <: Mode](
 
 object Api {
 
-  type Fm = Mode.Fetcher[Id]
-
   val fetcher: Fetcher[Id, Api] =
-    Api[Fm](
+    Api[Mode.Fetcher[Id]](
       getUser = (id: User.Identity) => User.fetch(id),
       getAllUsers = List(
         User.fetch(User.Root),

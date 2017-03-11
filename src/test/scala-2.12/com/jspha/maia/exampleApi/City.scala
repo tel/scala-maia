@@ -14,10 +14,8 @@ final case class City[M <: Mode](
 
 object City {
 
-  type Fm = Mode.Fetcher[Id]
-
   def atlanta: Fetcher[Id, City] =
-    City[Fm](
+    City[Mode.Fetcher[Id]](
       name = "Atlanta",
       location = Location.fetchConst(33.7490, 84.3880)
     )

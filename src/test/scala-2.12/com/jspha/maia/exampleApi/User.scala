@@ -20,18 +20,16 @@ object User {
   case object Root extends Identity
   case object JosephAbrahamson extends Identity
 
-  type Fm = Mode.Fetcher[Id]
-
   def fetch(id: Identity): Fetcher[Id, User] = id match {
     case Root =>
-      User[Fm](
+      User[Mode.Fetcher[Id]](
         name = "Root",
         age = -1,
         hometown = City.atlanta,
         lastKnownLocation = Location.fetchConst(0, 0)
       )
     case JosephAbrahamson =>
-      User[Fm](
+      User[Mode.Fetcher[Id]](
         name = "Joseph Abrahamson",
         age = 29,
         hometown = City.atlanta,

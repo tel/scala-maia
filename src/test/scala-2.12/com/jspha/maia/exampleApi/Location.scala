@@ -14,10 +14,8 @@ final case class Location[M <: Mode](
 
 object Location {
 
-  type Fm = Mode.Fetcher[Id]
-
   def fetchConst(latitude: Double, longitude: Double): Fetcher[Id, Location] =
-    Location[Fm](
+    Location[Mode.Fetcher[Id]](
       latitude = latitude,
       longitude = longitude
     )
