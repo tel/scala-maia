@@ -13,13 +13,13 @@ import cats.data.Validated
 
 import scala.collection.immutable.HashMap
 
-trait HasQuery[A[_ <: Mode]] {
+trait HasQuery[A[_ <: Fields]] {
   val query: Query[A]
 }
 
 object HasQuery {
 
-  implicit def HasQueryGeneric[Api[_ <: Mode], Repr <: HList](
+  implicit def HasQueryGeneric[Api[_ <: Fields], Repr <: HList](
     implicit gen: LabelledGeneric.Aux[Query[Api], Repr],
     worker: Worker[Repr]
   ): HasQuery[Api] =
@@ -41,7 +41,7 @@ object HasQuery {
     implicit def WorkerRecurAtom[K <: Symbol,
                                  ReqRepr <: HList,
                                  RespRepr <: HList,
-                                 Api[_ <: Mode],
+                                 Api[_ <: Fields],
                                  A,
                                  E,
                                  T <: HList](
@@ -49,13 +49,13 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#AtomE[E, A]],
+                           FieldType[K, Fields.Request#AtomE[E, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, Mode.Response.AtomE[E, A]],
+      selector: Selector.Aux[RespRepr, K, Fields.Response.AtomE[E, A]],
       kWitness: Witness.Aux[K]
-    ): Worker[FieldType[K, Mode.Query[Api]#AtomE[E, A]] :: T] =
-      new Worker[FieldType[K, Mode.Query[Api]#AtomE[E, A]] :: T] {
+    ): Worker[FieldType[K, Fields.Query[Api]#AtomE[E, A]] :: T] =
+      new Worker[FieldType[K, Fields.Query[Api]#AtomE[E, A]] :: T] {
 
         val request: Request[Api] =
           reqRepr.from(
@@ -78,7 +78,7 @@ object HasQuery {
         val lookup: Lookup[Api, E, A] =
           Lookup[Api, E, A](request, handleResponse)
 
-        val query: FieldType[K, Mode.Query[Api]#AtomE[E, A]] :: T =
+        val query: FieldType[K, Fields.Query[Api]#AtomE[E, A]] :: T =
           field[K](lookup) :: recur.value.query
 
       }
@@ -86,25 +86,25 @@ object HasQuery {
     implicit def WorkerRecurAtomNothing[K <: Symbol,
                                         ReqRepr <: HList,
                                         RespRepr <: HList,
-                                        Api[_ <: Mode],
+                                        Api[_ <: Fields],
                                         A,
                                         T <: HList](
       implicit recur: Lazy[Worker[T]],
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#AtomE[Nothing, A]],
+                           FieldType[K, Fields.Request#AtomE[Nothing, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, Mode.Response.AtomE[Nothing, A]],
+      selector: Selector.Aux[RespRepr, K, Fields.Response.AtomE[Nothing, A]],
       kWitness: Witness.Aux[K]
-    ): Worker[FieldType[K, Mode.Query[Api]#AtomE[Nothing, A]] :: T] =
+    ): Worker[FieldType[K, Fields.Query[Api]#AtomE[Nothing, A]] :: T] =
       WorkerRecurAtom[K, ReqRepr, RespRepr, Api, A, Nothing, T]
 
     implicit def WorkerRecurIndexedAtom[K <: Symbol,
                                         ReqRepr <: HList,
                                         RespRepr <: HList,
-                                        Api[_ <: Mode],
+                                        Api[_ <: Fields],
                                         A,
                                         E,
                                         I,
@@ -114,12 +114,12 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#IAtomE[I, E, A]],
+                           FieldType[K, Fields.Request#IAtomE[I, E, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, Mode.Response.IAtomE[I, E, A]]
-    ): Worker[FieldType[K, Mode.Query[Api]#IAtomE[I, E, A]] :: T] =
-      new Worker[FieldType[K, Mode.Query[Api]#IAtomE[I, E, A]] :: T] {
+      selector: Selector.Aux[RespRepr, K, Fields.Response.IAtomE[I, E, A]]
+    ): Worker[FieldType[K, Fields.Query[Api]#IAtomE[I, E, A]] :: T] =
+      new Worker[FieldType[K, Fields.Query[Api]#IAtomE[I, E, A]] :: T] {
 
         def lookup(ix: I): Lookup[Api, E, A] = {
 
@@ -145,7 +145,7 @@ object HasQuery {
           Lookup[Api, E, A](request, handleResponse)
         }
 
-        val query: FieldType[K, Mode.Query[Api]#IAtomE[I, E, A]] :: T =
+        val query: FieldType[K, Fields.Query[Api]#IAtomE[I, E, A]] :: T =
           field[K](lookup _) :: recur.value.query
 
       }
@@ -153,7 +153,7 @@ object HasQuery {
     implicit def WorkerRecurIndexedAtomNothing[K <: Symbol,
                                                ReqRepr <: HList,
                                                RespRepr <: HList,
-                                               Api[_ <: Mode],
+                                               Api[_ <: Fields],
                                                A,
                                                I,
                                                T <: HList](
@@ -162,18 +162,20 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#IAtomE[I, Nothing, A]],
+                           FieldType[K, Fields.Request#IAtomE[I, Nothing, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, Mode.Response.IAtomE[I, Nothing, A]]
-    ): Worker[FieldType[K, Mode.Query[Api]#IAtomE[I, Nothing, A]] :: T] =
+      selector: Selector.Aux[RespRepr,
+                             K,
+                             Fields.Response.IAtomE[I, Nothing, A]]
+    ): Worker[FieldType[K, Fields.Query[Api]#IAtomE[I, Nothing, A]] :: T] =
       WorkerRecurIndexedAtom[K, ReqRepr, RespRepr, Api, A, Nothing, I, T]
 
     implicit def WorkerRecurObjM[K <: Symbol,
                                  ReqRepr <: HList,
                                  RespRepr <: HList,
-                                 Api[_ <: Mode],
-                                 A[_ <: Mode],
+                                 Api[_ <: Fields],
+                                 A[_ <: Fields],
                                  E,
                                  M <: Cardinality,
                                  T <: HList](
@@ -182,18 +184,18 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#ObjE[M, E, A]],
+                           FieldType[K, Fields.Request#ObjE[M, E, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, Mode.Response.ObjE[M, E, A]],
+      selector: Selector.Aux[RespRepr, K, Fields.Response.ObjE[M, E, A]],
       multOps: Cardinality.Ops[M],
       recurQuery: Lazy[HasQuery[A]]
-    ): Worker[FieldType[K, Mode.Query[Api]#ObjE[M, E, A]] :: T] =
-      new Worker[FieldType[K, Mode.Query[Api]#ObjE[M, E, A]] :: T] {
+    ): Worker[FieldType[K, Fields.Query[Api]#ObjE[M, E, A]] :: T] =
+      new Worker[FieldType[K, Fields.Query[Api]#ObjE[M, E, A]] :: T] {
 
-        val qm: Mode.Query[Api] = new Mode.Query[Api]
+        val qm: Fields.Query[Api] = new Fields.Query[Api]
 
-        val query: FieldType[K, Mode.Query[Api]#ObjE[M, E, A]] :: T = {
+        val query: FieldType[K, Fields.Query[Api]#ObjE[M, E, A]] :: T = {
 
           val obj = new qm.ObjE[M, E, A] {
 
@@ -238,8 +240,8 @@ object HasQuery {
     implicit def WorkerRecurObjMNothing[K <: Symbol,
                                         ReqRepr <: HList,
                                         RespRepr <: HList,
-                                        Api[_ <: Mode],
-                                        A[_ <: Mode],
+                                        Api[_ <: Fields],
+                                        A[_ <: Fields],
                                         M <: Cardinality,
                                         T <: HList](
       implicit recur: Lazy[Worker[T]],
@@ -247,20 +249,20 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#ObjE[M, Nothing, A]],
+                           FieldType[K, Fields.Request#ObjE[M, Nothing, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, Mode.Response.ObjE[M, Nothing, A]],
+      selector: Selector.Aux[RespRepr, K, Fields.Response.ObjE[M, Nothing, A]],
       multOps: Cardinality.Ops[M],
       recurQuery: Lazy[HasQuery[A]]
-    ): Worker[FieldType[K, Mode.Query[Api]#ObjE[M, Nothing, A]] :: T] =
+    ): Worker[FieldType[K, Fields.Query[Api]#ObjE[M, Nothing, A]] :: T] =
       WorkerRecurObjM[K, ReqRepr, RespRepr, Api, A, Nothing, M, T]
 
     implicit def WorkerRecurIndexedMultiObj[K <: Symbol,
                                             ReqRepr <: HList,
                                             RespRepr <: HList,
-                                            Api[_ <: Mode],
-                                            A[_ <: Mode],
+                                            Api[_ <: Fields],
+                                            A[_ <: Fields],
                                             E,
                                             I,
                                             M <: Cardinality,
@@ -270,18 +272,18 @@ object HasQuery {
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
       updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#IObjE[I, M, E, A]],
+                           FieldType[K, Fields.Request#IObjE[I, M, E, A]],
                            ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
-      selector: Selector.Aux[RespRepr, K, Mode.Response.IObjE[I, M, E, A]],
+      selector: Selector.Aux[RespRepr, K, Fields.Response.IObjE[I, M, E, A]],
       multOps: Cardinality.Ops[M],
       recurQuery: Lazy[HasQuery[A]]
-    ): Worker[FieldType[K, Mode.Query[Api]#IObjE[I, M, E, A]] :: T] =
-      new Worker[FieldType[K, Mode.Query[Api]#IObjE[I, M, E, A]] :: T] {
+    ): Worker[FieldType[K, Fields.Query[Api]#IObjE[I, M, E, A]] :: T] =
+      new Worker[FieldType[K, Fields.Query[Api]#IObjE[I, M, E, A]] :: T] {
 
-        val qm: Mode.Query[Api] = new Mode.Query[Api]
+        val qm: Fields.Query[Api] = new Fields.Query[Api]
 
-        val query: FieldType[K, Mode.Query[Api]#IObjE[I, M, E, A]] :: T = {
+        val query: FieldType[K, Fields.Query[Api]#IObjE[I, M, E, A]] :: T = {
 
           val obj = new qm.IObjE[I, M, E, A] {
 
@@ -327,8 +329,8 @@ object HasQuery {
     implicit def WorkerRecurIndexedMultiObjNothing[K <: Symbol,
                                                    ReqRepr <: HList,
                                                    RespRepr <: HList,
-                                                   Api[_ <: Mode],
-                                                   A[_ <: Mode],
+                                                   Api[_ <: Fields],
+                                                   A[_ <: Fields],
                                                    I,
                                                    M <: Cardinality,
                                                    T <: HList](
@@ -336,16 +338,17 @@ object HasQuery {
       kWitness: Witness.Aux[K],
       buildNullRequest: NullRequest[Api],
       reqRepr: LabelledGeneric.Aux[Request[Api], ReqRepr],
-      updater: Updater.Aux[ReqRepr,
-                           FieldType[K, Mode.Request#IObjE[I, M, Nothing, A]],
-                           ReqRepr],
+      updater: Updater.Aux[
+        ReqRepr,
+        FieldType[K, Fields.Request#IObjE[I, M, Nothing, A]],
+        ReqRepr],
       respRepr: LabelledGeneric.Aux[Response[Api], RespRepr],
       selector: Selector.Aux[RespRepr,
                              K,
-                             Mode.Response.IObjE[I, M, Nothing, A]],
+                             Fields.Response.IObjE[I, M, Nothing, A]],
       multOps: Cardinality.Ops[M],
       recurQuery: Lazy[HasQuery[A]]
-    ): Worker[FieldType[K, Mode.Query[Api]#IObjE[I, M, Nothing, A]] :: T] =
+    ): Worker[FieldType[K, Fields.Query[Api]#IObjE[I, M, Nothing, A]] :: T] =
       WorkerRecurIndexedMultiObj[K,
                                  ReqRepr,
                                  RespRepr,

@@ -4,18 +4,16 @@
 
 package com.jspha.maia
 
-import cats.Apply
-
 import scala.language.higherKinds
 import com.jspha.maia
 
 import scala.collection.immutable.HashMap
 
 /**
-  * A [[Mode]] is a type signature providing meaning for the various types of
+  * A [[Fields]] is a type signature providing meaning for the various types of
   * field-lookups available in an Api.
   */
-trait Mode {
+trait Fields {
 
   /**
     * [[AtomE]] describes a field which returns a value atomically---no
@@ -46,9 +44,9 @@ trait Mode {
     *
     * @tparam A Api-schema of the returned "object" values
     */
-  type ObjE1[E, A[_ <: Mode]] = ObjE[Cardinality.One, E, A]
+  type ObjE1[E, A[_ <: Fields]] = ObjE[Cardinality.One, E, A]
 
-  type Obj1[A[_ <: Mode]] = ObjE[Cardinality.One, Nothing, A]
+  type Obj1[A[_ <: Fields]] = ObjE[Cardinality.One, Nothing, A]
 
   /**
     * [[ObjE]] describes a generic "object" field much like [[ObjE1]] but it
@@ -59,9 +57,9 @@ trait Mode {
     *          lookup
     * @tparam A Api-schema of the returned "object" values
     */
-  type ObjE[M <: Cardinality, E, A[_ <: Mode]]
+  type ObjE[M <: Cardinality, E, A[_ <: Fields]]
 
-  type Obj[M <: Cardinality, A[_ <: Mode]] = ObjE[M, Nothing, A]
+  type Obj[M <: Cardinality, A[_ <: Fields]] = ObjE[M, Nothing, A]
 
   /**
     * [[IObjE1]] is similar to [[ObjE1]] but allows for indexing or
@@ -70,9 +68,9 @@ trait Mode {
     * @tparam I The index or "argument" to this field lookup
     * @tparam A Api-schema of the returned "object" values
     */
-  type IObjE1[I, E, A[_ <: Mode]] = IObjE[I, Cardinality.One, E, A]
+  type IObjE1[I, E, A[_ <: Fields]] = IObjE[I, Cardinality.One, E, A]
 
-  type IObj1[I, A[_ <: Mode]] = IObjE[I, Cardinality.One, Nothing, A]
+  type IObj1[I, A[_ <: Fields]] = IObjE[I, Cardinality.One, Nothing, A]
 
   /**
     * [[IObjE]] is similar to [[ObjE]] but allows for indexing or
@@ -83,55 +81,55 @@ trait Mode {
     *          lookup
     * @tparam A Api-schema of the returned "object" values
     */
-  type IObjE[I, M <: Cardinality, E, A[_ <: Mode]]
+  type IObjE[I, M <: Cardinality, E, A[_ <: Fields]]
 
-  type IObj[I, M <: Cardinality, A[_ <: Mode]] = IObjE[I, M, Nothing, A]
+  type IObj[I, M <: Cardinality, A[_ <: Fields]] = IObjE[I, M, Nothing, A]
 }
 
-object Mode {
+object Fields {
 
-  final class Fetcher[F[_]] extends Mode {
+  final class Fetcher[F[_]] extends Fields {
     type AtomE[E, A] = F[Either[E, A]]
     type IAtomE[I, E, A] = I => F[Either[E, A]]
-    type ObjE[M <: Cardinality, E, Api[_ <: Mode]] =
+    type ObjE[M <: Cardinality, E, Api[_ <: Fields]] =
       F[Either[E, M#Coll[maia.Fetcher[F, Api]]]]
-    type IObjE[I, M <: Cardinality, E, Api[_ <: Mode]] =
+    type IObjE[I, M <: Cardinality, E, Api[_ <: Fields]] =
       I => F[Either[E, M#Coll[maia.Fetcher[F, Api]]]]
   }
 
-  final class Query[Super[_ <: Mode]] extends Mode {
+  final class Query[Super[_ <: Fields]] extends Fields {
 
     type AtomE[E, A] = Lookup[Super, E, A]
     type IAtomE[I, E, A] = I => Lookup[Super, E, A]
 
-    trait ObjE[M <: Cardinality, E, Sub[_ <: Mode]] {
+    trait ObjE[M <: Cardinality, E, Sub[_ <: Fields]] {
       def apply[R](cont: maia.Query[Sub] => Lookup[Sub, E, R])
         : Lookup[Super, E, M#Coll[R]]
     }
 
-    trait IObjE[I, M <: Cardinality, E, Sub[_ <: Mode]] {
+    trait IObjE[I, M <: Cardinality, E, Sub[_ <: Fields]] {
       def apply[R](ix: I)(cont: maia.Query[Sub] => Lookup[Sub, E, R])
         : Lookup[Super, E, M#Coll[R]]
     }
   }
 
-  sealed trait Response extends maia.Mode {
+  sealed trait Response extends maia.Fields {
     type AtomE[E, A] = Option[Either[E, A]]
     type IAtomE[I, E, A] = HashMap[I, Either[E, A]]
-    type ObjE[M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
+    type ObjE[M <: maia.Cardinality, E, A[_ <: maia.Fields]] =
       Option[Either[E, M#Coll[maia.Response[A]]]]
-    type IObjE[I, M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
+    type IObjE[I, M <: maia.Cardinality, E, A[_ <: maia.Fields]] =
       HashMap[I, Either[E, M#Coll[maia.Response[A]]]]
   }
 
   object Response extends Response
 
-  sealed trait Request extends maia.Mode {
+  sealed trait Request extends maia.Fields {
     type AtomE[E, A] = Boolean
     type IAtomE[I, E, A] = Set[I]
-    type ObjE[M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
+    type ObjE[M <: maia.Cardinality, E, A[_ <: maia.Fields]] =
       Option[maia.Request[A]]
-    type IObjE[I, M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
+    type IObjE[I, M <: maia.Cardinality, E, A[_ <: maia.Fields]] =
       HashMap[I, maia.Request[A]]
   }
 

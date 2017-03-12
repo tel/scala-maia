@@ -7,7 +7,7 @@ package com.jspha.maia.examples.api1
 import com.jspha.maia._
 import cats._
 
-final case class City[M <: Mode](
+final case class City[M <: Fields](
   name: M#Atom[String],
   location: M#Obj1[Location]
 )
@@ -15,7 +15,7 @@ final case class City[M <: Mode](
 object City {
 
   def atlanta: Fetcher[Id, City] =
-    City[Mode.Fetcher[Id]](
+    City[Fields.Fetcher[Id]](
       name = Right("Atlanta"),
       location = Right(Location.fetchConst(33.7490, 84.3880))
     )

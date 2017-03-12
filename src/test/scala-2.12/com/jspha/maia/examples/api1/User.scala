@@ -7,7 +7,7 @@ package com.jspha.maia.examples.api1
 import com.jspha.maia._
 import cats._
 
-final case class User[M <: Mode](
+final case class User[M <: Fields](
   name: M#Atom[String],
   age: M#Atom[Int],
   hometown: M#ObjE1[Nothing, City],
@@ -22,14 +22,14 @@ object User {
 
   def fetch(id: Identity): Fetcher[Id, User] = id match {
     case Root =>
-      User[Mode.Fetcher[Id]](
+      User[Fields.Fetcher[Id]](
         name = Right("Root"),
         age = Right(-1),
         hometown = Right(City.atlanta),
         lastKnownLocation = Right(Location.fetchConst(0, 0))
       )
     case JosephAbrahamson =>
-      User[Mode.Fetcher[Id]](
+      User[Fields.Fetcher[Id]](
         name = Right("Joseph Abrahamson"),
         age = Right(29),
         hometown = Right(City.atlanta),

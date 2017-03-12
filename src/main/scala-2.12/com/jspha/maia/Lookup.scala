@@ -28,7 +28,7 @@ import cats.syntax.CartesianBuilder
   * @tparam R The type of result produced by the client from the requested
   *           information
   */
-final case class Lookup[Api[_ <: Mode], +E, +R] private[maia] (
+final case class Lookup[Api[_ <: Fields], +E, +R] private[maia] (
   request: Request[Api],
   handleResponse: Response[Api] => Validated[LookupError[E], R]
 ) {
@@ -70,7 +70,8 @@ object Lookup {
   private def ValAp[E]: Apply[Validated[LookupError[E], ?]] =
     implicitly[Apply[Validated[LookupError[E], ?]]]
 
-  implicit def LookupIsFunctor[Api[_ <: Mode], E]: Functor[Lookup[Api, E, ?]] =
+  implicit def LookupIsFunctor[Api[_ <: Fields], E]
+    : Functor[Lookup[Api, E, ?]] =
     new Functor[Lookup[Api, E, ?]] {
       def map[A, B](fa: Lookup[Api, E, A])(f: A => B): Lookup[Api, E, B] =
         Lookup[Api, E, B](request = fa.request,
@@ -78,7 +79,7 @@ object Lookup {
                             resp => fa.handleResponse(resp).map(f))
     }
 
-  implicit def LookupIsCartesian[Api[_ <: Mode], E](
+  implicit def LookupIsCartesian[Api[_ <: Fields], E](
     implicit merger: generic.MergeRequests[Api]
   ): Cartesian[Lookup[Api, E, ?]] =
     new Cartesian[Lookup[Api, E, ?]] {

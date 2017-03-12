@@ -11,13 +11,13 @@ import shapeless._
 import scala.collection.immutable.HashMap
 
 // TODO: Implement this computation via implicits
-trait MergeRequests[Api[_ <: Mode]] {
+trait MergeRequests[Api[_ <: Fields]] {
   def apply(a: Request[Api], b: Request[Api]): Request[Api]
 }
 
 object MergeRequests {
 
-  implicit def MergeRequestsGeneric[Api[_ <: Mode], Repr <: HList](
+  implicit def MergeRequestsGeneric[Api[_ <: Fields], Repr <: HList](
     implicit gen: Generic.Aux[Request[Api], Repr],
     worker: Worker[Repr]
   ): MergeRequests[Api] =
@@ -34,29 +34,29 @@ object MergeRequests {
 
     implicit def WorkerRecurAtom[A, E, Tail <: HList](
       implicit recur: Worker[Tail]
-    ): Worker[Mode.Request.AtomE[E, A] :: Tail] =
-      (ll: Mode.Request.AtomE[E, A] :: Tail,
-       rr: Mode.Request.AtomE[E, A] :: Tail) =>
+    ): Worker[Fields.Request.AtomE[E, A] :: Tail] =
+      (ll: Fields.Request.AtomE[E, A] :: Tail,
+       rr: Fields.Request.AtomE[E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) => (l || r) :: recur(ls, rs)
       }
 
     implicit def WorkerRecurIndexedAtom[A, E, I, Tail <: HList](
       implicit recur: Worker[Tail]
-    ): Worker[Mode.Request.IAtomE[I, E, A] :: Tail] =
-      (ll: Mode.Request.IAtomE[I, E, A] :: Tail,
-       rr: Mode.Request.IAtomE[I, E, A] :: Tail) =>
+    ): Worker[Fields.Request.IAtomE[I, E, A] :: Tail] =
+      (ll: Fields.Request.IAtomE[I, E, A] :: Tail,
+       rr: Fields.Request.IAtomE[I, E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) => (l ++ r) :: recur(ls, rs)
       }
 
-    implicit def WorkerRecurObjM[A[_ <: Mode],
+    implicit def WorkerRecurObjM[A[_ <: Fields],
                                  E,
                                  M <: Cardinality,
                                  Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]
-    ): Worker[Mode.Request.ObjE[M, E, A] :: Tail] =
+    ): Worker[Fields.Request.ObjE[M, E, A] :: Tail] =
       (ll: Option[Request[A]] :: Tail, rr: Option[Request[A]] :: Tail) =>
         (ll, rr) match {
           case (None :: ls, None :: rs) => None :: recur(ls, rs)
@@ -66,16 +66,16 @@ object MergeRequests {
             Some(recurObj(l, r)) :: recur(ls, rs)
       }
 
-    implicit def WorkerRecurIndexedMultiObj[A[_ <: Mode],
+    implicit def WorkerRecurIndexedMultiObj[A[_ <: Fields],
                                             E,
                                             I,
                                             M <: Cardinality,
                                             Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]
-    ): Worker[Mode.Request.IObjE[I, M, E, A] :: Tail] =
-      (ll: Mode.Request.IObjE[I, M, E, A] :: Tail,
-       rr: Mode.Request.IObjE[I, M, E, A] :: Tail) =>
+    ): Worker[Fields.Request.IObjE[I, M, E, A] :: Tail] =
+      (ll: Fields.Request.IObjE[I, M, E, A] :: Tail,
+       rr: Fields.Request.IObjE[I, M, E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) =>
             val here: HashMap[I, Request[A]] = l.merged(r) { (lt, rt) =>

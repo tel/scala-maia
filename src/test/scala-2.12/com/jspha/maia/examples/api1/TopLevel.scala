@@ -7,7 +7,7 @@ package com.jspha.maia.examples.api1
 import cats._
 import com.jspha.maia._
 
-final case class TopLevel[M <: Mode](
+final case class TopLevel[M <: Fields](
   name: M#Atom[String],
   age: M#Atom[Int],
   getRoot: M#Obj1[User],
@@ -18,7 +18,7 @@ final case class TopLevel[M <: Mode](
 object TopLevel {
 
   val fetcher: Fetcher[Id, TopLevel] =
-    TopLevel[Mode.Fetcher[Id]](
+    TopLevel[Fields.Fetcher[Id]](
       name = Right("hello"),
       age = Right(10),
       getRoot = Right(User.fetch(User.Root)),

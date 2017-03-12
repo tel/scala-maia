@@ -7,7 +7,7 @@ package com.jspha.maia.examples.api1
 import com.jspha.maia._
 import cats._
 
-final case class Location[M <: Mode](
+final case class Location[M <: Fields](
   latitude: M#Atom[Double],
   longitude: M#Atom[Double]
 )
@@ -15,7 +15,7 @@ final case class Location[M <: Mode](
 object Location {
 
   def fetchConst(latitude: Double, longitude: Double): Fetcher[Id, Location] =
-    Location[Mode.Fetcher[Id]](
+    Location[Fields.Fetcher[Id]](
       latitude = Right(latitude),
       longitude = Right(longitude)
     )
