@@ -14,15 +14,8 @@ well-typed query language. It shares similar goals with the larger [GraphQL
 project](http://graphql.org/) but is optimized for the Scala platform and
 ecosystem and offers more type-level guarantees to users for that restriction.
 
-See [Architecture](../master/docs/architecture.md) for an overview of Maia's
-design and implementation.
-
-## Important note
-
-*Co-maintainers desired!* In order to move toward a C4-like contribution model,
-I need co-maintainers so that I can shed the power of merging my own code. It's
-not quite yet time to do this, but soon. If you're interested in GraphQL, Scala,
-and type-level programming (e.g. Shapeless) [contact me](mailto:me@jspha.com).
+**Looking for more maintainers.** If you're interested in Scala, GraphQL,
+APIs, and/or type-level programming then [contact me](mailto:me@jspha.com).
 
 ## Etymology
 
@@ -32,16 +25,28 @@ having a discussion through a series of questions and answers.
 
 ## Contributing
 
-Maia is intended to follow a [C4-like](https://rfc.zeromq.org/spec:42/C4/)
-contribution system. As Maia is still in the early stages of design this is not
-yet in place, but contributions are still welcome.
+### Short of it
 
-Maintainers are to merge all _correct_ patches which _aid in the discovery or
-implementation of the Maia API_ and therefore value judgements can be made by
-the maintainers as to whether a patch is moving in a valuable direction at this
-time.
+- Contributors welcome. Contribute a comment, identify a problem, submit
+  a PR.
+- Any PR which solves a "real, recognized problem" and passes tests gets
+  merged: no questions asked.
+  - If you cause a new "real, recognized problem" then someone can
+    submit a new patch to fix it.
+- "Real, recognized problems" are tracked in Github Issues on the
+  [Problem Flow board](../../projects/2).
 
-Current direction on work is organized via [a Github project](../../projects/1).
+### Deeper dive
+
+Maia is follows a [C4-like](https://rfc.zeromq.org/spec:42/C4/)-like
+contribution system. As Maia is still in the early stages, so this stuff
+isn't all in place quite yet, but if you'd like to contribute then we'll
+move to make it easy for you.
+
+Generally, C4 implies a commit-first-ask-questions-later style
+development process. Submit a PR and if it solves a real problem and
+passes tests then a Maintainer will merge it quickly and without further
+debate.
 
 ### Patch guidelines
 
