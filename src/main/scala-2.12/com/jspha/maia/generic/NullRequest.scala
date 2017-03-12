@@ -35,11 +35,11 @@ object NullRequest {
       val request: HNil = HNil
     }
 
-    implicit def WorkerRecurAtom[A, K <: Symbol, T <: HList](
+    implicit def WorkerRecurAtom[A, E, K <: Symbol, T <: HList](
       implicit recur: Worker[T]
-    ): Worker[FieldType[K, Mode.Request.Atom[A]] :: T] =
-      new Worker[FieldType[K, Mode.Request.Atom[A]] :: T] {
-        val request: FieldType[K, Mode.Request.Atom[A]] :: T =
+    ): Worker[FieldType[K, Mode.Request.AtomE[E, A]] :: T] =
+      new Worker[FieldType[K, Mode.Request.AtomE[E, A]] :: T] {
+        val request: FieldType[K, Mode.Request.AtomE[E, A]] :: T =
           field[K](false) :: recur.request
       }
 

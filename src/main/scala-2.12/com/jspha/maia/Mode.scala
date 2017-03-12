@@ -16,11 +16,15 @@ import scala.collection.immutable.HashMap
 trait Mode {
 
   /**
-    * [[Atom]] describes a field which returns a value atomically---no
+    * [[AtomE]] describes a field which returns a value atomically---no
     * further query is run against the returned value, it's returned wholesale.
+    *
+    * @tparam E Possible error type
     * @tparam A Return type of this field lookup
     */
-  type Atom[A]
+  type AtomE[E, A]
+
+  type Atom[A] = AtomE[Nothing, A]
 
   /**
     * [[IAtom]] describes an atomic field that is indexed by a single
@@ -69,42 +73,44 @@ trait Mode {
 
 object Mode {
 
-  final class Fetcher[F[_], E] extends Mode {
-    type Atom[A] = F[Either[E, A]]
-    type IAtom[I, A] = I => F[Either[E, A]]
+  final class Fetcher[F[_]] extends Mode {
+    type AtomE[E, A] = F[Either[E, A]]
+    type IAtom[I, A] = I => F[A]
     type Obj[M <: Cardinality, Api[_ <: Mode]] =
-      F[Either[E, M#Coll[maia.Fetcher[F, E, Api]]]]
+      F[M#Coll[maia.Fetcher[F, Api]]]
     type IObj[I, M <: Cardinality, Api[_ <: Mode]] =
-      I => F[Either[E, M#Coll[maia.Fetcher[F, E, Api]]]]
+      I => F[M#Coll[maia.Fetcher[F, Api]]]
   }
 
-  final class Query[Super[_ <: Mode], E] extends Mode {
+  final class Query[Super[_ <: Mode]] extends Mode {
 
-    type Atom[A] = Lookup[Super, E, A]
-    type IAtom[I, A] = I => Lookup[Super, E, A]
+    type AtomE[E, A] = Lookup[Super, E, A]
+    type IAtom[I, A] = I => Lookup[Super, Nothing, A]
 
     trait Obj[M <: Cardinality, Sub[_ <: Mode]] {
-      def apply[R](cont: maia.Query[E, Sub] => Lookup[Sub, E, R])
-        : Lookup[Super, E, M#Coll[R]]
+      def apply[R](cont: maia.Query[Sub] => Lookup[Sub, Nothing, R])
+        : Lookup[Super, Nothing, M#Coll[R]]
     }
 
     trait IObj[I, M <: Cardinality, Sub[_ <: Mode]] {
-      def apply[R](ix: I)(cont: maia.Query[E, Sub] => Lookup[Sub, E, R])
-        : Lookup[Super, E, M#Coll[R]]
+      def apply[R](ix: I)(cont: maia.Query[Sub] => Lookup[Sub, Nothing, R])
+        : Lookup[Super, Nothing, M#Coll[R]]
     }
   }
 
-  final class Response[E] extends maia.Mode {
-    type Atom[A] = Option[Either[E, A]]
-    type IAtom[I, A] = HashMap[I, Either[E, A]]
+  sealed trait Response extends maia.Mode {
+    type AtomE[E, A] = Option[Either[E, A]]
+    type IAtom[I, A] = HashMap[I, A]
     type Obj[M <: maia.Cardinality, A[_ <: maia.Mode]] =
-      Option[Either[E, M#Coll[maia.Response[E, A]]]]
+      Option[M#Coll[maia.Response[A]]]
     type IObj[I, M <: maia.Cardinality, A[_ <: maia.Mode]] =
-      HashMap[I, Either[E, M#Coll[maia.Response[E, A]]]]
+      HashMap[I, M#Coll[maia.Response[A]]]
   }
 
+  object Response extends Response
+
   sealed trait Request extends maia.Mode {
-    type Atom[A] = Boolean
+    type AtomE[E, A] = Boolean
     type IAtom[I, A] = Set[I]
     type Obj[M <: maia.Cardinality, A[_ <: maia.Mode]] =
       Option[maia.Request[A]]

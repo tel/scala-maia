@@ -14,16 +14,16 @@ final case class City[M <: Mode](
 
 object City {
 
-  def atlanta: Fetcher[Id, Err, City] =
-    City[Mode.Fetcher[Id, Err]](
+  def atlanta: Fetcher[Id, City] =
+    City[Mode.Fetcher[Id]](
       name = Right("Atlanta"),
-      location = Right(Location.fetchConst(33.7490, 84.3880))
+      location = Location.fetchConst(33.7490, 84.3880)
     )
 
-  val q: Query[Err, City] =
-    implicitly[generic.HasQuery[Err, City]].query
+  val q: Query[City] =
+    implicitly[generic.HasQuery[City]].query
 
-  val i: generic.Interprets[Id, Err, City] =
-    generic.Interprets[Id, Err, City]
+  val i: generic.Interprets[Id, City] =
+    generic.Interprets[Id, City]
 
 }

@@ -6,6 +6,7 @@ package com.jspha.maia
 
 import scala.language.higherKinds
 import cats._
+import cats.syntax.CartesianOps
 import cats.data.Validated
 
 /**
@@ -26,9 +27,9 @@ import cats.data.Validated
   * @tparam R The type of result produced by the client from the requested
   *           information
   */
-final case class Lookup[Api[_ <: Mode], E, +R] private[maia] (
+final case class Lookup[Api[_ <: Mode], +E, +R] private[maia] (
   request: Request[Api],
-  handleResponse: Response[E, Api] => Validated[LookupError[E], R]
+  handleResponse: Response[Api] => Validated[LookupError[E], R]
 ) {
 
   /**
@@ -36,8 +37,8 @@ final case class Lookup[Api[_ <: Mode], E, +R] private[maia] (
     * [[Lookup]] no longer fails one [[handle]] has been called: errors will
     * not be propagated upward.
     */
-  def handle: Lookup[Api, E, Validated[LookupError[E], R]] =
-    Lookup[Api, E, Validated[LookupError[E], R]](
+  def handle: Lookup[Api, Nothing, Validated[LookupError[E], R]] =
+    Lookup[Api, Nothing, Validated[LookupError[E], R]](
       request,
       handleResponse = resp => Validated.valid(handleResponse(resp))
     )
@@ -53,6 +54,7 @@ object Lookup {
     implicit merger: generic.MergeRequests[Api]
   ): Apply[Lookup[Api, E, ?]] =
     new Apply[Lookup[Api, E, ?]] {
+
       def ap[A, B](ff: Lookup[Api, E, A => B])(fa: Lookup[Api, E, A]) =
         Lookup[Api, E, B](
           request = merger.apply(ff.request, fa.request),

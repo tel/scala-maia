@@ -20,27 +20,27 @@ object User {
   case object Root extends Identity
   case object JosephAbrahamson extends Identity
 
-  def fetch(id: Identity): Fetcher[Id, Err, User] = id match {
+  def fetch(id: Identity): Fetcher[Id, User] = id match {
     case Root =>
-      User[Mode.Fetcher[Id, Err]](
+      User[Mode.Fetcher[Id]](
         name = Right("Root"),
         age = Right(-1),
-        hometown = Right(City.atlanta),
-        lastKnownLocation = Right(Location.fetchConst(0, 0))
+        hometown = City.atlanta,
+        lastKnownLocation = Location.fetchConst(0, 0)
       )
     case JosephAbrahamson =>
-      User[Mode.Fetcher[Id, Err]](
+      User[Mode.Fetcher[Id]](
         name = Right("Joseph Abrahamson"),
         age = Right(29),
-        hometown = Right(City.atlanta),
-        lastKnownLocation = Right(Location.fetchConst(42.3601, 71.0589))
+        hometown = City.atlanta,
+        lastKnownLocation = Location.fetchConst(42.3601, 71.0589)
       )
   }
 
-  val q: Query[Err, User] =
-    implicitly[generic.HasQuery[Err, User]].query
+  val q: Query[User] =
+    implicitly[generic.HasQuery[User]].query
 
-  val i: generic.Interprets[Id, Err, User] =
-    generic.Interprets[Id, Err, User]
+  val i: generic.Interprets[Id, User] =
+    generic.Interprets[Id, User]
 
 }

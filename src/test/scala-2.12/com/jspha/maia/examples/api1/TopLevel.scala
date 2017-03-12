@@ -17,23 +17,22 @@ final case class TopLevel[M <: Mode](
 
 object TopLevel {
 
-  val fetcher: Fetcher[Id, Err, TopLevel] =
-    TopLevel[Mode.Fetcher[Id, Err]](
+  val fetcher: Fetcher[Id, TopLevel] =
+    TopLevel[Mode.Fetcher[Id]](
       name = Right("hello"),
       age = Right(10),
-      getRoot = Right(User.fetch(User.Root)),
-      getUser = (id: User.Identity) => Right(User.fetch(id)),
-      getAllUsers = Right(
-        List(
-          User.fetch(User.Root),
-          User.fetch(User.JosephAbrahamson)
-        ))
+      getRoot = User.fetch(User.Root),
+      getUser = (id: User.Identity) => User.fetch(id),
+      getAllUsers = List(
+        User.fetch(User.Root),
+        User.fetch(User.JosephAbrahamson)
+      )
     )
 
-  val q: Query[Err, TopLevel] =
-    implicitly[generic.HasQuery[Err, TopLevel]].query
+  val q: Query[TopLevel] =
+    implicitly[generic.HasQuery[TopLevel]].query
 
-  val i: generic.Interprets[Id, Err, TopLevel] =
-    generic.Interprets[Id, Err, TopLevel]
+  val i: generic.Interprets[Id, TopLevel] =
+    generic.Interprets[Id, TopLevel]
 
 }

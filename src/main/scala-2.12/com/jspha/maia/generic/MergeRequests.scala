@@ -32,10 +32,11 @@ object MergeRequests {
 
     implicit val WorkerHNil: Worker[HNil] = (l: HNil, r: HNil) => HNil
 
-    implicit def WorkerRecurAtom[A, Tail <: HList](
+    implicit def WorkerRecurAtom[A, E, Tail <: HList](
       implicit recur: Worker[Tail]
-    ): Worker[Mode.Request.Atom[A] :: Tail] =
-      (ll: Mode.Request.Atom[A] :: Tail, rr: Mode.Request.Atom[A] :: Tail) =>
+    ): Worker[Mode.Request.AtomE[E, A] :: Tail] =
+      (ll: Mode.Request.AtomE[E, A] :: Tail,
+       rr: Mode.Request.AtomE[E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) => (l || r) :: recur(ls, rs)
       }
