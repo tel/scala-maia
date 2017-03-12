@@ -4,6 +4,8 @@
 
 package com.jspha.maia
 
+import cats.Apply
+
 import scala.language.higherKinds
 import com.jspha.maia
 

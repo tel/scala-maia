@@ -19,10 +19,10 @@ object Api1Tests extends TestSuite {
       user.name
     }
 
-//  val lkUserNameAge: Lookup[TopLevel, Nothing, (String, Int)] =
-//    TopLevel.q.getUser(User.JosephAbrahamson) { user =>
-//      (catsSyntaxCartesian(user.name) |@| user.age).tupled
-//    }
+  val lkUserNameAge: Lookup[TopLevel, Nothing, (String, Int)] =
+    TopLevel.q.getUser(User.JosephAbrahamson) { user =>
+      (user.name |@| user.age).tupled
+    }
 
   def runLookup[R, E](
     l: Lookup[TopLevel, E, R]): Validated[LookupError[E], R] =
