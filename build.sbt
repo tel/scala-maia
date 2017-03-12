@@ -30,9 +30,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.lihaoyi" %% "utest" % uTestVersion % "test",
-  "co.fs2" %% "fs2-core" % "0.9.2" % "test",
-  "co.fs2" %% "fs2-cats" % "0.3.0"
+  "com.lihaoyi" %% "utest" % uTestVersion % "test"
 )
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
