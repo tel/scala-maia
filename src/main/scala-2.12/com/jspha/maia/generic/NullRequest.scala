@@ -43,34 +43,36 @@ object NullRequest {
           field[K](false) :: recur.request
       }
 
-    implicit def WorkerRecurIndexedAtom[A, I, K <: Symbol, T <: HList](
+    implicit def WorkerRecurIndexedAtom[A, E, I, K <: Symbol, T <: HList](
       implicit recur: Worker[T]
-    ): Worker[FieldType[K, Mode.Request.IAtom[I, A]] :: T] =
-      new Worker[FieldType[K, Mode.Request.IAtom[I, A]] :: T] {
-        val request: FieldType[K, Mode.Request.IAtom[I, A]] :: T =
+    ): Worker[FieldType[K, Mode.Request.IAtom[I, E, A]] :: T] =
+      new Worker[FieldType[K, Mode.Request.IAtom[I, E, A]] :: T] {
+        val request: FieldType[K, Mode.Request.IAtom[I, E, A]] :: T =
           field[K](Set.empty[I]) :: recur.request
       }
 
     implicit def WorkerRecurObjM[A[_ <: Mode],
+                                 E,
                                  M <: Cardinality,
                                  K <: Symbol,
                                  T <: HList](
       implicit recur: Worker[T]
-    ): Worker[FieldType[K, Mode.Request.Obj[M, A]] :: T] =
-      new Worker[FieldType[K, Mode.Request.Obj[M, A]] :: T] {
-        val request: FieldType[K, Mode.Request.Obj[M, A]] :: T =
+    ): Worker[FieldType[K, Mode.Request.Obj[M, E, A]] :: T] =
+      new Worker[FieldType[K, Mode.Request.Obj[M, E, A]] :: T] {
+        val request: FieldType[K, Mode.Request.Obj[M, E, A]] :: T =
           field[K](None) :: recur.request
       }
 
     implicit def WorkerRecurIndexedMultiObj[A[_ <: Mode],
+                                            E,
                                             I,
                                             M <: Cardinality,
                                             K <: Symbol,
                                             T <: HList](
       implicit recur: Worker[T]
-    ): Worker[FieldType[K, Mode.Request.IObj[I, M, A]] :: T] =
-      new Worker[FieldType[K, Mode.Request.IObj[I, M, A]] :: T] {
-        val request: FieldType[K, Mode.Request.IObj[I, M, A]] :: T =
+    ): Worker[FieldType[K, Mode.Request.IObj[I, M, E, A]] :: T] =
+      new Worker[FieldType[K, Mode.Request.IObj[I, M, E, A]] :: T] {
+        val request: FieldType[K, Mode.Request.IObj[I, M, E, A]] :: T =
           field[K](HashMap.empty[I, Request[A]]) :: recur.request
       }
 

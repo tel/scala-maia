@@ -10,9 +10,9 @@ import com.jspha.maia._
 final case class TopLevel[M <: Mode](
   name: M#Atom[String],
   age: M#Atom[Int],
-  getRoot: M#Obj1[User],
-  getUser: M#IObj1[User.Identity, User],
-  getAllUsers: M#Obj[Cardinality.Many, User]
+  getRoot: M#Obj1[Nothing, User],
+  getUser: M#IObj1[User.Identity, Nothing, User],
+  getAllUsers: M#Obj[Cardinality.Many, Nothing, User]
 )
 
 object TopLevel {
@@ -21,12 +21,13 @@ object TopLevel {
     TopLevel[Mode.Fetcher[Id]](
       name = Right("hello"),
       age = Right(10),
-      getRoot = User.fetch(User.Root),
-      getUser = (id: User.Identity) => User.fetch(id),
-      getAllUsers = List(
-        User.fetch(User.Root),
-        User.fetch(User.JosephAbrahamson)
-      )
+      getRoot = Right(User.fetch(User.Root)),
+      getUser = (id: User.Identity) => Right(User.fetch(id)),
+      getAllUsers = Right(
+        List(
+          User.fetch(User.Root),
+          User.fetch(User.JosephAbrahamson)
+        ))
     )
 
   val q: Query[TopLevel] =

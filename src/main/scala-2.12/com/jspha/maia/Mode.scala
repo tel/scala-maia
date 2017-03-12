@@ -33,14 +33,14 @@ trait Mode {
     * @tparam I Index or "argument" to the field
     * @tparam A Return type of this field lookup
     */
-  type IAtom[I, A]
+  type IAtom[I, E, A]
 
   /**
     * [[Obj1]] describes a field returning a single "object" which supports
     * sub-querying.
     * @tparam A Api-schema of the returned "object" values
     */
-  type Obj1[A[_ <: Mode]] = Obj[Cardinality.One, A]
+  type Obj1[E, A[_ <: Mode]] = Obj[Cardinality.One, E, A]
 
   /**
     * [[Obj]] describes a generic "object" field much like [[Obj1]] but it
@@ -50,7 +50,7 @@ trait Mode {
     *          lookup
     * @tparam A Api-schema of the returned "object" values
     */
-  type Obj[M <: Cardinality, A[_ <: Mode]]
+  type Obj[M <: Cardinality, E, A[_ <: Mode]]
 
   /**
     * [[IObj1]] is similar to [[Obj1]] but allows for indexing or
@@ -58,7 +58,7 @@ trait Mode {
     * @tparam I The index or "argument" to this field lookup
     * @tparam A Api-schema of the returned "object" values
     */
-  type IObj1[I, A[_ <: Mode]] = IObj[I, Cardinality.One, A]
+  type IObj1[I, E, A[_ <: Mode]] = IObj[I, Cardinality.One, E, A]
 
   /**
     * [[IObj]] is similar to [[Obj]] but allows for indexing or
@@ -68,53 +68,53 @@ trait Mode {
     *          lookup
     * @tparam A Api-schema of the returned "object" values
     */
-  type IObj[I, M <: Cardinality, A[_ <: Mode]]
+  type IObj[I, M <: Cardinality, E, A[_ <: Mode]]
 }
 
 object Mode {
 
   final class Fetcher[F[_]] extends Mode {
     type AtomE[E, A] = F[Either[E, A]]
-    type IAtom[I, A] = I => F[A]
-    type Obj[M <: Cardinality, Api[_ <: Mode]] =
-      F[M#Coll[maia.Fetcher[F, Api]]]
-    type IObj[I, M <: Cardinality, Api[_ <: Mode]] =
-      I => F[M#Coll[maia.Fetcher[F, Api]]]
+    type IAtom[I, E, A] = I => F[Either[E, A]]
+    type Obj[M <: Cardinality, E, Api[_ <: Mode]] =
+      F[Either[E, M#Coll[maia.Fetcher[F, Api]]]]
+    type IObj[I, M <: Cardinality, E, Api[_ <: Mode]] =
+      I => F[Either[E, M#Coll[maia.Fetcher[F, Api]]]]
   }
 
   final class Query[Super[_ <: Mode]] extends Mode {
 
     type AtomE[E, A] = Lookup[Super, E, A]
-    type IAtom[I, A] = I => Lookup[Super, Nothing, A]
+    type IAtom[I, E, A] = I => Lookup[Super, E, A]
 
-    trait Obj[M <: Cardinality, Sub[_ <: Mode]] {
-      def apply[R](cont: maia.Query[Sub] => Lookup[Sub, Nothing, R])
-        : Lookup[Super, Nothing, M#Coll[R]]
+    trait Obj[M <: Cardinality, E, Sub[_ <: Mode]] {
+      def apply[R](cont: maia.Query[Sub] => Lookup[Sub, E, R])
+        : Lookup[Super, E, M#Coll[R]]
     }
 
-    trait IObj[I, M <: Cardinality, Sub[_ <: Mode]] {
-      def apply[R](ix: I)(cont: maia.Query[Sub] => Lookup[Sub, Nothing, R])
-        : Lookup[Super, Nothing, M#Coll[R]]
+    trait IObj[I, M <: Cardinality, E, Sub[_ <: Mode]] {
+      def apply[R](ix: I)(cont: maia.Query[Sub] => Lookup[Sub, E, R])
+        : Lookup[Super, E, M#Coll[R]]
     }
   }
 
   sealed trait Response extends maia.Mode {
     type AtomE[E, A] = Option[Either[E, A]]
-    type IAtom[I, A] = HashMap[I, A]
-    type Obj[M <: maia.Cardinality, A[_ <: maia.Mode]] =
-      Option[M#Coll[maia.Response[A]]]
-    type IObj[I, M <: maia.Cardinality, A[_ <: maia.Mode]] =
-      HashMap[I, M#Coll[maia.Response[A]]]
+    type IAtom[I, E, A] = HashMap[I, Either[E, A]]
+    type Obj[M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
+      Option[Either[E, M#Coll[maia.Response[A]]]]
+    type IObj[I, M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
+      HashMap[I, Either[E, M#Coll[maia.Response[A]]]]
   }
 
   object Response extends Response
 
   sealed trait Request extends maia.Mode {
     type AtomE[E, A] = Boolean
-    type IAtom[I, A] = Set[I]
-    type Obj[M <: maia.Cardinality, A[_ <: maia.Mode]] =
+    type IAtom[I, E, A] = Set[I]
+    type Obj[M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
       Option[maia.Request[A]]
-    type IObj[I, M <: maia.Cardinality, A[_ <: maia.Mode]] =
+    type IObj[I, M <: maia.Cardinality, E, A[_ <: maia.Mode]] =
       HashMap[I, maia.Request[A]]
   }
 

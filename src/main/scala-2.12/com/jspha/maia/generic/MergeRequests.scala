@@ -41,21 +41,22 @@ object MergeRequests {
           case (l :: ls, r :: rs) => (l || r) :: recur(ls, rs)
       }
 
-    implicit def WorkerRecurIndexedAtom[A, I, Tail <: HList](
+    implicit def WorkerRecurIndexedAtom[A, E, I, Tail <: HList](
       implicit recur: Worker[Tail]
-    ): Worker[Mode.Request.IAtom[I, A] :: Tail] =
-      (ll: Mode.Request.IAtom[I, A] :: Tail,
-       rr: Mode.Request.IAtom[I, A] :: Tail) =>
+    ): Worker[Mode.Request.IAtom[I, E, A] :: Tail] =
+      (ll: Mode.Request.IAtom[I, E, A] :: Tail,
+       rr: Mode.Request.IAtom[I, E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) => (l ++ r) :: recur(ls, rs)
       }
 
     implicit def WorkerRecurObjM[A[_ <: Mode],
+                                 E,
                                  M <: Cardinality,
                                  Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]
-    ): Worker[Mode.Request.Obj[M, A] :: Tail] =
+    ): Worker[Mode.Request.Obj[M, E, A] :: Tail] =
       (ll: Option[Request[A]] :: Tail, rr: Option[Request[A]] :: Tail) =>
         (ll, rr) match {
           case (None :: ls, None :: rs) => None :: recur(ls, rs)
@@ -66,14 +67,15 @@ object MergeRequests {
       }
 
     implicit def WorkerRecurIndexedMultiObj[A[_ <: Mode],
+                                            E,
                                             I,
                                             M <: Cardinality,
                                             Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]
-    ): Worker[Mode.Request.IObj[I, M, A] :: Tail] =
-      (ll: Mode.Request.IObj[I, M, A] :: Tail,
-       rr: Mode.Request.IObj[I, M, A] :: Tail) =>
+    ): Worker[Mode.Request.IObj[I, M, E, A] :: Tail] =
+      (ll: Mode.Request.IObj[I, M, E, A] :: Tail,
+       rr: Mode.Request.IObj[I, M, E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) =>
             val here: HashMap[I, Request[A]] = l.merged(r) { (lt, rt) =>

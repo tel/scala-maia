@@ -9,7 +9,7 @@ import cats._
 
 final case class City[M <: Mode](
   name: M#Atom[String],
-  location: M#Obj1[Location]
+  location: M#Obj1[Nothing, Location]
 )
 
 object City {
@@ -17,7 +17,7 @@ object City {
   def atlanta: Fetcher[Id, City] =
     City[Mode.Fetcher[Id]](
       name = Right("Atlanta"),
-      location = Location.fetchConst(33.7490, 84.3880)
+      location = Right(Location.fetchConst(33.7490, 84.3880))
     )
 
   val q: Query[City] =

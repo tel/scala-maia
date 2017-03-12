@@ -10,8 +10,8 @@ import cats._
 final case class User[M <: Mode](
   name: M#Atom[String],
   age: M#Atom[Int],
-  hometown: M#Obj1[City],
-  lastKnownLocation: M#Obj1[Location]
+  hometown: M#Obj1[Nothing, City],
+  lastKnownLocation: M#Obj1[Nothing, Location]
 )
 
 object User {
@@ -25,15 +25,15 @@ object User {
       User[Mode.Fetcher[Id]](
         name = Right("Root"),
         age = Right(-1),
-        hometown = City.atlanta,
-        lastKnownLocation = Location.fetchConst(0, 0)
+        hometown = Right(City.atlanta),
+        lastKnownLocation = Right(Location.fetchConst(0, 0))
       )
     case JosephAbrahamson =>
       User[Mode.Fetcher[Id]](
         name = Right("Joseph Abrahamson"),
         age = Right(29),
-        hometown = City.atlanta,
-        lastKnownLocation = Location.fetchConst(42.3601, 71.0589)
+        hometown = Right(City.atlanta),
+        lastKnownLocation = Right(Location.fetchConst(42.3601, 71.0589))
       )
   }
 
