@@ -8,7 +8,7 @@ import scala.language.higherKinds
 import com.jspha.maia._
 import shapeless._
 import shapeless.labelled._
-import shapeless.ops.record._
+import shapeless.ops.record.{Selector, Updater}
 import cats.data.Validated
 
 import scala.collection.immutable.HashMap
