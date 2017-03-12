@@ -13,4 +13,6 @@ package object maia {
   type Query[A[_ <: Mode]] = A[Mode.Query[A]]
   type Fetcher[M[_], A[_ <: Mode]] = A[Mode.Fetcher[M]]
 
+  type LookupS[Api[_ <: Mode], A] = Lookup[Api, Nothing, A]
+
 }

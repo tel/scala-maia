@@ -10,8 +10,8 @@ import cats._
 final case class User[M <: Mode](
   name: M#Atom[String],
   age: M#Atom[Int],
-  hometown: M#Obj1[Nothing, City],
-  lastKnownLocation: M#Obj1[Nothing, Location]
+  hometown: M#ObjE1[Nothing, City],
+  lastKnownLocation: M#ObjE1[Nothing, Location]
 )
 
 object User {

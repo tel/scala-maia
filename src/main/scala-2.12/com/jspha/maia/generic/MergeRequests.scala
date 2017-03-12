@@ -43,9 +43,9 @@ object MergeRequests {
 
     implicit def WorkerRecurIndexedAtom[A, E, I, Tail <: HList](
       implicit recur: Worker[Tail]
-    ): Worker[Mode.Request.IAtom[I, E, A] :: Tail] =
-      (ll: Mode.Request.IAtom[I, E, A] :: Tail,
-       rr: Mode.Request.IAtom[I, E, A] :: Tail) =>
+    ): Worker[Mode.Request.IAtomE[I, E, A] :: Tail] =
+      (ll: Mode.Request.IAtomE[I, E, A] :: Tail,
+       rr: Mode.Request.IAtomE[I, E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) => (l ++ r) :: recur(ls, rs)
       }
@@ -56,7 +56,7 @@ object MergeRequests {
                                  Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]
-    ): Worker[Mode.Request.Obj[M, E, A] :: Tail] =
+    ): Worker[Mode.Request.ObjE[M, E, A] :: Tail] =
       (ll: Option[Request[A]] :: Tail, rr: Option[Request[A]] :: Tail) =>
         (ll, rr) match {
           case (None :: ls, None :: rs) => None :: recur(ls, rs)
@@ -73,9 +73,9 @@ object MergeRequests {
                                             Tail <: HList](
       implicit recur: Worker[Tail],
       recurObj: MergeRequests[A]
-    ): Worker[Mode.Request.IObj[I, M, E, A] :: Tail] =
-      (ll: Mode.Request.IObj[I, M, E, A] :: Tail,
-       rr: Mode.Request.IObj[I, M, E, A] :: Tail) =>
+    ): Worker[Mode.Request.IObjE[I, M, E, A] :: Tail] =
+      (ll: Mode.Request.IObjE[I, M, E, A] :: Tail,
+       rr: Mode.Request.IObjE[I, M, E, A] :: Tail) =>
         (ll, rr) match {
           case (l :: ls, r :: rs) =>
             val here: HashMap[I, Request[A]] = l.merged(r) { (lt, rt) =>

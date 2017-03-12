@@ -47,11 +47,21 @@ final case class Lookup[Api[_ <: Mode], +E, +R] private[maia] (
   def map[S](f: R => S): Lookup[Api, E, S] =
     copy[Api, E, S](handleResponse = resp => handleResponse(resp).map(f))
 
-  def |@|[EE >: E, RR >: R, S](other: Lookup[Api, EE, S])(
+  // scalastyle:off
+
+  /**
+    * This is [[cats.syntax.CartesianOps.|@|]] under a different name.
+    * Unfortunately, instance resolution doesn't seem to work (despite
+    * [[Lookup.LookupIsCartesian]]), so using [[*]] drives inference manually
+    * to the right result.
+    */
+  def *[EE >: E, RR >: R, S](other: Lookup[Api, EE, S])(
     implicit merger: generic.MergeRequests[Api]) =
     catsSyntaxCartesian[Lookup[Api, EE, ?], RR](this)(
       Lookup
         .LookupIsCartesian[Api, EE]) |@| other
+
+  // scalastyle:on
 
 }
 

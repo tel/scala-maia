@@ -10,9 +10,9 @@ import com.jspha.maia._
 final case class TopLevel[M <: Mode](
   name: M#Atom[String],
   age: M#Atom[Int],
-  getRoot: M#Obj1[Nothing, User],
-  getUser: M#IObj1[User.Identity, Nothing, User],
-  getAllUsers: M#Obj[Cardinality.Many, Nothing, User]
+  getRoot: M#Obj1[User],
+  getUser: M#IObj1[User.Identity, User],
+  getAllUsers: M#Obj[Cardinality.Many, User]
 )
 
 object TopLevel {
