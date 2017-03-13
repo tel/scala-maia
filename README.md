@@ -4,7 +4,7 @@
 *Highly-typeful data fetching in Scala.js, a la GraphQL*
 
 [![Build
-Status](https://travis-ci.org/tel/scala-maia.svg?branch=master)](https://travis-ci.org/tel/scala-maia)
+Status](https://travis-ci.org/MaiaOrg/scala-maia.svg?branch=master)](https://travis-ci.org/MaiaOrg/scala-maia)
 
 ## Welcome
 
