@@ -6,6 +6,7 @@ package com.jspha.maia
 
 import cats._
 import cats.implicits._
+import io.circe._
 
 import scala.language.higherKinds
 
@@ -47,17 +48,34 @@ object Cardinality {
     */
   trait Ops[M <: Cardinality] {
     val traversable: Traverse[M#Coll]
+    def encoder[A](enc: Encoder[A]): Encoder[M#Coll[A]]
+    def decoder[A](dec: Decoder[A]): Decoder[M#Coll[A]]
   }
 
-  object Ops {
-    def build[M <: Cardinality](implicit T: Traverse[M#Coll]): Ops[M] =
-      new Ops[M] {
-        val traversable: Traverse[M#Coll] = T
-      }
+  implicit val SingularOps: Ops[One] = new Ops[One] {
+    val traversable: Traverse[One#Coll] = Traverse[One#Coll]
+    def encoder[A](enc: Encoder[A]): Encoder[A] = enc
+    def decoder[A](dec: Decoder[A]): Decoder[A] = dec
   }
 
-  implicit val SingularOps: Ops[One] = Ops.build[One]
-  implicit val OptionalOps: Ops[Opt] = Ops.build[Opt]
-  implicit val CollectionOps: Ops[Many] = Ops.build[Many]
+  implicit val OptionalOps: Ops[Opt] = new Ops[Opt] {
+    val traversable: Traverse[Option] = Traverse[Option]
+
+    def encoder[A](enc: Encoder[A]): Encoder[Option[A]] =
+      Encoder.encodeOption(enc)
+
+    def decoder[A](dec: Decoder[A]): Decoder[Option[A]] =
+      Decoder.decodeOption(dec)
+  }
+
+  implicit val CollectionOps: Ops[Many] = new Ops[Many] {
+    val traversable: Traverse[List] = Traverse[List]
+
+    def encoder[A](enc: Encoder[A]): Encoder[List[A]] =
+      Encoder.encodeFoldable(enc, implicitly)
+
+    def decoder[A](dec: Decoder[A]): Decoder[List[A]] =
+      Decoder.decodeCanBuildFrom(dec, implicitly)
+  }
 
 }

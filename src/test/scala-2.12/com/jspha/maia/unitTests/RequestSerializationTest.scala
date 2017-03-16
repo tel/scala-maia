@@ -10,30 +10,30 @@ import io.circe._
 
 import scala.collection.immutable.HashMap
 
-final case class EncoderTest[F <: Fields](
+final case class RequestSerializationTest[F <: Fields](
   x: F#Atom[Int],
   y: F#AtomE[String, Int],
   z: F#IAtomE[Int, String, Int],
-  w: F#Obj[Cardinality.Many, EncoderTest.Sibling],
-  v: F#IObj[Int, Cardinality.Many, EncoderTest.Sibling]
+  w: F#Obj[Cardinality.Many, RequestSerializationTest.Sibling],
+  v: F#IObj[Int, Cardinality.Many, RequestSerializationTest.Sibling]
 )
 
-object EncoderTest {
+object RequestSerializationTest {
 
   final case class Sibling[F <: Fields](
-    encoderTest: F#ObjE[Cardinality.Many, String, EncoderTest]
+    encoderTest: F#ObjE[Cardinality.Many, String, RequestSerializationTest]
   )
 
-  val encoder: Encoder[Request[EncoderTest]] =
-    implicitly[RequestEncoder[EncoderTest]]
+  val reqEncoder: Encoder[Request[RequestSerializationTest]] =
+    implicitly[RequestEncoder[RequestSerializationTest]]
 
-  val decoder: Decoder[Request[EncoderTest]] =
-    implicitly[RequestDecoder[EncoderTest]]
+  val reqDecoder: Decoder[Request[RequestSerializationTest]] =
+    implicitly[RequestDecoder[RequestSerializationTest]]
 
   val siblingRequest: Request[Sibling] =
     Sibling[Fields.Request](
       encoderTest = Some(
-        EncoderTest[Fields.Request](
+        RequestSerializationTest[Fields.Request](
           x = true,
           y = false,
           z = Set(3),
@@ -42,8 +42,8 @@ object EncoderTest {
         ))
     )
 
-  val request: Request[EncoderTest] =
-    EncoderTest[Fields.Request](
+  val request: Request[RequestSerializationTest] =
+    RequestSerializationTest[Fields.Request](
       x = true,
       y = false,
       z = Set(3),
@@ -53,9 +53,9 @@ object EncoderTest {
       )
     )
 
-  val json: Json = encoder(request)
+  val json: Json = reqEncoder(request)
 
-  val decoded: Decoder.Result[Request[EncoderTest]] =
-    decoder.decodeJson(json)
+  val decoded: Decoder.Result[Request[RequestSerializationTest]] =
+    reqDecoder.decodeJson(json)
 
 }
