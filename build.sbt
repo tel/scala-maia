@@ -118,7 +118,7 @@ lazy val exampleAppShared = crossProject
 lazy val exampleAppSharedJVM =
   exampleAppShared.jvm.settings(name := "sharedJvm")
 lazy val exampleAppSharedJS =
-  exampleAppShared.js.settings(name := "sSaredJs")
+  exampleAppShared.js.settings(name := "sharedJs")
 
 lazy val exampleAppUi = project
   .in(file("example-app/ui"))
@@ -134,7 +134,7 @@ lazy val exampleAppUi = project
   )
   .settings(workbenchSettings)
   .settings(
-    bootSnippet := "jspha.qubit.ui.Runtime().main();",
+    bootSnippet := "com.jspha.maia.example.ui.Runtime().main();",
     refreshBrowsers := {
       refreshBrowsers.triggeredBy(fastOptJS in Compile).value
     }
