@@ -5,7 +5,6 @@
 package com.jspha.maia.http4s
 
 import com.jspha.maia._
-import com.jspha.maia.generic._
 import fs2.Task
 import org.http4s.circe._
 import org.http4s.dsl._
@@ -13,24 +12,25 @@ import org.http4s.{Request => _, Response => _, _}
 
 import scala.language.higherKinds
 
-class ApiEndpoint[M[_], T[_ <: Fields]](
-  fetcher: Fetcher[M, T],
+class ApiEndpoint[M[_], T[_ <: Dsl]](
+  fetcher: Handler[M, T],
   asTask: M[Response[T]] => Task[Response[T]])(
-  implicit reqDecoder: RequestDecoder[T],
-  respEncoder: ResponseEncoder[T],
-  interprets: Interprets[M, T]) {
+  implicit
+//  reqDecoder: RequestDecoder[T],
+//  respEncoder: ResponseEncoder[T],
+  runner: typelevel.RunHandler[M, T]) {
 
   implicit val reqEntityDecoder: EntityDecoder[Request[T]] =
-    jsonOf(reqDecoder)
+    ??? // jsonOf(reqDecoder)
 
   implicit val respEntityEncoder: EntityEncoder[Response[T]] =
-    jsonEncoderOf(respEncoder)
+    ??? // jsonEncoderOf(respEncoder)
 
   val service = HttpService {
     case req @ POST -> Root =>
       for {
         maiaReq <- req.as[Request[T]]
-        maiaResp <- asTask(interprets(fetcher, maiaReq))
+        maiaResp <- asTask(runner(fetcher, maiaReq))
         http4sResp <- Ok(maiaResp)
       } yield http4sResp
   }
@@ -39,17 +39,19 @@ class ApiEndpoint[M[_], T[_ <: Fields]](
 
 object ApiEndpoint {
 
-  def apply[M[_], T[_ <: Fields]](fetcher: Fetcher[M, T],
-                                  asTask: M[Response[T]] => Task[Response[T]])(
-    implicit reqDecoder: RequestDecoder[T],
-    respEncoder: ResponseEncoder[T],
-    interprets: Interprets[M, T]): ApiEndpoint[M, T] =
+  def apply[M[_], T[_ <: Dsl]](fetcher: Handler[M, T],
+                               asTask: M[Response[T]] => Task[Response[T]])(
+    implicit
+//    reqDecoder: RequestDecoder[T],
+//    respEncoder: ResponseEncoder[T],
+    interprets: typelevel.RunHandler[M, T]): ApiEndpoint[M, T] =
     new ApiEndpoint[M, T](fetcher, asTask)
 
-  def apply[T[_ <: Fields]](fetcher: Fetcher[Task, T])(
-    implicit reqDecoder: RequestDecoder[T],
-    respEncoder: ResponseEncoder[T],
-    interprets: Interprets[Task, T]): ApiEndpoint[Task, T] =
+  def apply[T[_ <: Dsl]](fetcher: Handler[Task, T])(
+    implicit
+//    reqDecoder: RequestDecoder[T],
+//    respEncoder: ResponseEncoder[T],
+    interprets: typelevel.RunHandler[Task, T]): ApiEndpoint[Task, T] =
     new ApiEndpoint[Task, T](fetcher, identity)
 
 }

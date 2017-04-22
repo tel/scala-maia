@@ -36,12 +36,12 @@ object Runtime extends StreamApp {
 
   val apiService: ApiEndpoint[Task, TopLevel] =
     ApiEndpoint[TopLevel](
-      TopLevel[Fields.Fetcher[Task]](
-        getCount = Task.now(Right(0))
+      TopLevel[form.Handler[Task]](
+        getCount = Task.now(0)
       )
     )
 
-  def main(args: List[String]): Stream[Task, Unit] = {
+  def stream(args: List[String]): Stream[Task, Unit] = {
     BlazeBuilder
       .bindHttp(8080, "localhost")
       .mountService(indexService, "/")

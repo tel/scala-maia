@@ -6,14 +6,13 @@ package com.jspha.maia.example.ui
 
 import com.jspha.maia._
 import com.jspha.maia.example.api._
-import com.jspha.maia.generic.HasQuery
 
 object Lookups {
 
-  val tlq: Query[TopLevel] =
-    implicitly[HasQuery[TopLevel]].query
+  val tlq: QueriesAt[TopLevel] =
+    typelevel.GetQueriesAt[TopLevel]
 
-  val lookupCount: LookupS[TopLevel, Int] =
+  val lookupCount: Query[TopLevel, Nothing, Int] =
     tlq.getCount
 
 }

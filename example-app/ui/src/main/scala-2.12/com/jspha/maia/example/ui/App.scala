@@ -6,7 +6,6 @@ package com.jspha.maia.example.ui
 
 import com.jspha.maia._
 import com.jspha.maia.example.api.TopLevel
-import com.jspha.maia.generic.{RequestEncoder, ResponseDecoder}
 import fr.hmil.roshttp.HttpRequest
 import fr.hmil.roshttp.body.PlainTextBody
 import fr.hmil.roshttp.response.SimpleHttpResponse
@@ -18,14 +17,14 @@ import scala.util.{Failure, Success}
 
 object App {
 
-  val lk: LookupS[TopLevel, Int] =
+  val lk: Query[TopLevel, Nothing, Int] =
     Lookups.lookupCount
 
   val reqEncoder: Encoder[Request[TopLevel]] =
-    implicitly[RequestEncoder[TopLevel]]
+    ??? // implicitly[RequestEncoder[TopLevel]]
 
   val respDecoder: Decoder[Response[TopLevel]] =
-    implicitly[ResponseDecoder[TopLevel]]
+    ??? // implicitly[ResponseDecoder[TopLevel]]
 
   def run(request: HttpRequest): Unit =
     request

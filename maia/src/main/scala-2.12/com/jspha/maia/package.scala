@@ -8,11 +8,9 @@ import scala.language.higherKinds
 
 package object maia {
 
-  type Request[A[_ <: Fields]] = A[Fields.Request]
-  type Response[A[_ <: Fields]] = A[Fields.Response]
-  type Query[A[_ <: Fields]] = A[Fields.Query[A]]
-  type Fetcher[M[_], A[_ <: Fields]] = A[Fields.Fetcher[M]]
-
-  type LookupS[Api[_ <: Fields], A] = Lookup[Api, Nothing, A]
+  type Request[T[_ <: Dsl]] = T[form.Request]
+  type Response[T[_ <: Dsl]] = T[form.Response]
+  type QueriesAt[T[_ <: Dsl]] = T[form.QueriesAt[T]]
+  type Handler[F[_], T[_ <: Dsl]] = T[form.Handler[F]]
 
 }

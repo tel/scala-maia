@@ -11,43 +11,45 @@ import io.circe._
 import scala.language.higherKinds
 
 /**
-  * [[Cardinality]]s are a feature of a collection of items. There are there
-  * cardinalities: [[Cardinality.One]], [[Cardinality.Opt]], and
-  * [[Cardinality.Many]] corresponding to having exactly one object, having
+  * [[Size]]s are a feature of a collection of items. There are there
+  * cardinalities: [[One]], [[Opt]], and
+  * [[Many]] corresponding to having exactly one object, having
   * zero or one objects, and having zero, one, or many objects.
   */
-sealed trait Cardinality {
+sealed trait Size {
 
   /**
-    * A [[Coll]] of a given [[Cardinality]] collects as many objects as the
+    * A [[Coll]] of a given [[Size]] collects as many objects as the
     * cardinality allows.
     */
   type Coll[_]
+
+  type Fold[IfOne <: Up, IfOpt <: Up, IfMany <: Up, Up] <: Up
 }
 
-object Cardinality {
+sealed trait One extends Size {
+  type Coll[A] = A
+  type Fold[IfOne <: Up, IfOpt <: Up, IfMany <: Up, Up] = IfOne
+}
+
+sealed trait Opt extends Size {
+  type Coll[A] = Option[A]
+  type Fold[IfOne <: Up, IfOpt <: Up, IfMany <: Up, Up] = IfOpt
+}
+
+sealed trait Many extends Size {
+  type Coll[A] = List[A]
+  type Fold[IfOne <: Up, IfOpt <: Up, IfMany <: Up, Up] = IfMany
+}
+
+object Size {
 
   /**
-    * A collection of `A`s of [[Cardinality]] [[One]] is just `A`
+    * [[Ops]] provide operations for working with a [[Size#Coll]] of the
+    * given [[Size]]
     */
-  sealed trait One extends Cardinality { type Coll[A] = A }
-
-  /**
-    * A collection of `A`s of [[Cardinality]] [[Opt]] is `Option[A]`
-    */
-  sealed trait Opt extends Cardinality { type Coll[A] = Option[A] }
-
-  /**
-    * A collection of `A`s of [[Cardinality]] [[Many]] is a `List[A]`
-    */
-  sealed trait Many extends Cardinality { type Coll[A] = List[A] }
-
-  /**
-    * [[Ops]] provide operations for working with a [[Cardinality#Coll]] of the
-    * given [[Cardinality]]
-    */
-  trait Ops[M <: Cardinality] {
-    val traversable: Traverse[M#Coll]
+  trait Ops[M <: Size] {
+    def traversable: Traverse[M#Coll]
     def encoder[A](enc: Encoder[A]): Encoder[M#Coll[A]]
     def decoder[A](dec: Decoder[A]): Decoder[M#Coll[A]]
   }
