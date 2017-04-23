@@ -6,6 +6,7 @@ package com.jspha.maia.examples.api1
 
 import com.jspha.maia._
 import cats.Id
+import com.jspha.maia.examples.util.{CirceSerialization => Csz}
 
 final case class Location[F <: Dsl](
   latitude: F#Atom[Double],
@@ -28,5 +29,11 @@ object Location {
 
   def runner(req: Request[Location]): Response[Location] =
     typelevel.RunHandler[Id, Location](fetchConst(0, 0), req)
+
+  val sz: Serializer[Csz.Params, Location] =
+    Location[form.Serializer[Csz.Params]](
+      latitude = ((), (), Csz.circeSection),
+      longitude = ((), (), Csz.circeSection)
+    )
 
 }

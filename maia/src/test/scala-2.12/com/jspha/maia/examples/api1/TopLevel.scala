@@ -6,6 +6,7 @@ package com.jspha.maia.examples.api1
 
 import cats._
 import com.jspha.maia._
+import com.jspha.maia.examples.util.{CirceSerialization => Csz}
 
 final case class TopLevel[F <: Dsl](
   name: F#Atom[String],
@@ -32,10 +33,19 @@ object TopLevel {
   val req0: Request[TopLevel] =
     typelevel.NullRequest[TopLevel]
 
-  val q: QueriesAt[TopLevel] =
-    typelevel.GetQueriesAt[TopLevel]
+//  val q: QueriesAt[TopLevel] =
+//    typelevel.GetQueriesAt[TopLevel]
 
   def runner(req: Request[TopLevel]): Response[TopLevel] =
     typelevel.RunHandler[Id, TopLevel](fetcher, req)
+
+  lazy val sz: Serializer[Csz.Params, TopLevel] =
+    TopLevel[form.Serializer[Csz.Params]](
+      name = ((), (), Csz.circeSection),
+      age = ((), (), Csz.circeSection),
+      getRoot = ((), (), User.sz),
+      getUser = (Csz.circeSection, (), User.sz),
+      getAllUsers = ((), (), User.sz)
+    )
 
 }

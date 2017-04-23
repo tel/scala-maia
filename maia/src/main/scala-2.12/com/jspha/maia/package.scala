@@ -5,6 +5,7 @@
 package com.jspha
 
 import scala.language.higherKinds
+import com.jspha.maia.serialization.Section
 
 package object maia {
 
@@ -12,5 +13,6 @@ package object maia {
   type Response[T[_ <: Dsl]] = T[form.Response]
   type QueriesAt[T[_ <: Dsl]] = T[form.QueriesAt[T]]
   type Handler[F[_], T[_ <: Dsl]] = T[form.Handler[F]]
+  type Serializer[P <: Section.Params, T[_ <: Dsl]] = T[form.Serializer[P]]
 
 }

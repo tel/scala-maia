@@ -6,6 +6,7 @@ package com.jspha.maia.examples.api1
 
 import com.jspha.maia._
 import shapeless._
+import com.jspha.maia.examples.util.{CirceSerialization => Csz}
 
 final case class Nullo[F <: Dsl]()
 
@@ -22,5 +23,8 @@ object Nullo {
 
   def runner(req: Request[Nullo]): Response[Nullo] =
     typelevel.RunHandler[Id, Nullo](fetch, req)
+
+  val sz: Serializer[Csz.Params, Nullo] =
+    Nullo[form.Serializer[Csz.Params]]()
 
 }

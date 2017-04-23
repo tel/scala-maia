@@ -6,6 +6,8 @@ package com.jspha.maia.examples.api1
 
 import cats.Id
 import com.jspha.maia._
+import com.jspha.maia.examples.util.{CirceSerialization => Csz}
+import io.circe._
 
 final case class Identity[F <: Dsl](
   keyName: F#Atom[String],
@@ -16,6 +18,13 @@ object Identity {
 
   sealed trait Error
   case object NotAuthorized extends Error
+
+  object Error {
+    implicit val encoder: Encoder[Error] =
+      io.circe.generic.semiauto.deriveEncoder
+    implicit val decoder: Decoder[Error] =
+      io.circe.generic.semiauto.deriveDecoder
+  }
 
   def fetcher(name: String): Handler[Id, Identity] =
     Identity[form.Handler[Id]](
@@ -31,5 +40,11 @@ object Identity {
 
   def runner(req: Request[Identity]): Response[Identity] =
     typelevel.RunHandler[Id, Identity](fetcher("foo"), req)
+
+  val sz: Serializer[Csz.Params, Identity] =
+    Identity[form.Serializer[Csz.Params]](
+      keyName = ((), (), Csz.circeSection),
+      secret = ((), Csz.circeSection, Csz.circeSection)
+    )
 
 }

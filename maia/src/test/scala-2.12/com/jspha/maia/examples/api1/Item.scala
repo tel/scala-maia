@@ -4,8 +4,10 @@
 
 package com.jspha.maia.examples.api1
 
-import cats.Id
 import com.jspha.maia._
+import com.jspha.maia.examples.util.{CirceSerialization => Csz}
+import cats.Id
+import io.circe._
 
 final case class Item[F <: Dsl](
   name: F#Atom[String],
@@ -17,8 +19,22 @@ object Item {
   sealed trait Currency
   case object USD extends Currency
 
+  object Currency {
+    implicit val encoder: Encoder[Currency] =
+      io.circe.generic.semiauto.deriveEncoder
+    implicit val decoder: Decoder[Currency] =
+      io.circe.generic.semiauto.deriveDecoder
+  }
+
   sealed trait Error
   case object NotAvailable extends Error
+
+  object Error {
+    implicit val encoder: Encoder[Error] =
+      io.circe.generic.semiauto.deriveEncoder
+    implicit val decoder: Decoder[Error] =
+      io.circe.generic.semiauto.deriveDecoder
+  }
 
   def fetchConst(name: String, cost: Currency => Double): Handler[Id, Item] =
     Item[form.Handler[Id]](
@@ -34,4 +50,11 @@ object Item {
 
   def runner(req: Request[Item]): Response[Item] =
     typelevel.RunHandler[Id, Item](fetchConst("foo", _ => 10), req)
+
+  val sz: Serializer[Csz.Params, Item] =
+    Item[form.Serializer[Csz.Params]](
+      name = ((), (), Csz.circeSection),
+      cost = (Csz.circeSection, Csz.circeSection, Csz.circeSection)
+    )
+
 }

@@ -6,11 +6,14 @@ package com.jspha.maia.examples.api1
 
 import com.jspha.maia._
 import cats._
+import com.jspha.maia.examples.util.{CirceSerialization => Csz}
+import io.circe._
 
 final case class User[M <: Dsl](
   name: M#Atom[String],
   age: M#Atom[Int],
   hometown: M#Obj[City],
+  mother: M#ObjK[User, NoArg, NoErr, Opt],
   lastKnownLocation: M#Obj[Location],
   getId: M#Obj[Identity]
 )
@@ -21,12 +24,20 @@ object User {
   case object Root extends UID
   case object JosephAbrahamson extends UID
 
+  object UID {
+    implicit val encoder: Encoder[UID] =
+      io.circe.generic.semiauto.deriveEncoder
+    implicit val decoder: Decoder[UID] =
+      io.circe.generic.semiauto.deriveDecoder
+  }
+
   def fetch(id: UID): Handler[Id, User] = id match {
     case Root =>
       User[form.Handler[Id]](
         name = "Root",
         age = -1,
         hometown = City.atlanta,
+        mother = None,
         lastKnownLocation = Location.fetchConst(0, 0),
         getId = Identity.fetcher("root")
       )
@@ -35,6 +46,7 @@ object User {
         name = "Joseph Abrahamson",
         age = 29,
         hometown = City.atlanta,
+        mother = None,
         lastKnownLocation = Location.fetchConst(42.3601, 71.0589),
         getId = Identity.fetcher("joseph-abrahamson")
       )
@@ -43,10 +55,20 @@ object User {
   val req0: Request[User] =
     typelevel.NullRequest[User]
 
-  val q: QueriesAt[User] =
-    typelevel.GetQueriesAt[User]
+//  val q: QueriesAt[User] =
+//    typelevel.GetQueriesAt[User]
 
   def runner(req: Request[User]): Response[User] =
     typelevel.RunHandler[Id, User](fetch(Root), req)
+
+  lazy val sz: Serializer[Csz.Params, User] =
+    User[form.Serializer[Csz.Params]](
+      name = ((), (), Csz.circeSection),
+      age = ((), (), Csz.circeSection),
+      hometown = ((), (), City.sz),
+      mother = ((), (), sz),
+      lastKnownLocation = ((), (), Location.sz),
+      getId = ((), (), Identity.sz)
+    )
 
 }
