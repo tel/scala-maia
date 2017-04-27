@@ -9,7 +9,7 @@ import io.circe._
 
 object CirceSerialization {
 
-  sealed trait Params extends Section.Params {
+  sealed trait Params extends SerializationParams {
     type Target = Json
     type InjectEff[A] = A
     type RetractEff[A] = Either[DecodingFailure, A]

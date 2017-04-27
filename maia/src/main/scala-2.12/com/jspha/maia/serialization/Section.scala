@@ -7,7 +7,7 @@ package com.jspha.maia.serialization
 import scala.language.higherKinds
 import cats.Functor
 
-final case class Section[P <: Section.Params, S](
+final case class Section[P <: SerializationParams, S](
   inject: S => P#InjectEff[P#Target],
   retract: P#Target => P#RetractEff[S]) {
 
@@ -17,23 +17,5 @@ final case class Section[P <: Section.Params, S](
       inject = ss => inject(preSource(ss)),
       retract = t => F.map(retract(t))(postSource)
     )
-
-}
-
-object Section {
-
-  trait Params {
-    type Target
-    type InjectEff[A]
-    type RetractEff[A]
-  }
-
-  object Params {
-    type Aux[Target0, InjectEff0[_], RetractEff0[_]] = Params {
-      type Target = Target0
-      type InjectEff[A] = InjectEff0[A]
-      type RetractEff[A] = RetractEff0[A]
-    }
-  }
 
 }

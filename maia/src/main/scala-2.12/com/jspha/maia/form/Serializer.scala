@@ -9,7 +9,7 @@ import com.jspha.maia.{Serializer => MaiaSerializer, _}
 import com.jspha.maia.serialization._
 import shapeless.Lazy
 
-sealed trait Serializer[P <: Section.Params] extends Dsl {
+sealed trait Serializer[P <: SerializationParams] extends Dsl {
   type AtomK[A, As <: ArgSpec, Es <: ErrSpec, S <: Size] =
     (As#Fold[Section[P, ?], Unit, Any],
      Es#Fold[Section[P, ?], Unit, Any],
