@@ -26,8 +26,18 @@ object City {
   val req0: Request[City] =
     typelevel.NullRequest[City]
 
-//  val q: QueriesAt[City] =
-//    typelevel.GetQueriesAt[City]
+  val req1: Request[City] =
+    City[form.Request](
+      name = true,
+      location = None,
+      mayor = None
+    )
+
+  val reqCombined: Request[City] =
+    typelevel.MergeRequests[City](req0, req1)
+
+  val q: QueriesAt[City] =
+    typelevel.GetQueriesAt[City]
 
   def runner(req: Request[City]): Response[City] =
     typelevel.RunHandler[Id, City](atlanta, req)

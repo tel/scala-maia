@@ -8,9 +8,9 @@ import cats._
 import com.jspha.maia._
 import com.jspha.maia.examples.util.{CirceSerialization => Csz}
 
+import scala.collection.immutable.HashMap
+
 final case class TopLevel[F <: Dsl](
-  name: F#Atom[String],
-  age: F#Atom[Int],
   getRoot: F#Obj[User],
   getUser: F#ObjK[User, HasArg[User.UID], NoErr, One],
   getAllUsers: F#ObjK[User, NoArg, NoErr, Many]
@@ -20,8 +20,6 @@ object TopLevel {
 
   val fetcher: Handler[Id, TopLevel] =
     TopLevel[form.Handler[Id]](
-      name = "hello",
-      age = 10,
       getRoot = User.fetch(User.Root),
       getUser = (id: User.UID) => User.fetch(id),
       getAllUsers = List(
@@ -33,16 +31,24 @@ object TopLevel {
   val req0: Request[TopLevel] =
     typelevel.NullRequest[TopLevel]
 
-//  val q: QueriesAt[TopLevel] =
-//    typelevel.GetQueriesAt[TopLevel]
+  val req1: Request[TopLevel] =
+    TopLevel[form.Request](
+      getRoot = None,
+      getUser = HashMap(User.JosephAbrahamson -> User.req1),
+      getAllUsers = None
+    )
+
+  val reqCombined: Request[TopLevel] =
+    typelevel.MergeRequests[TopLevel](req0, req1)
+
+  val q: QueriesAt[TopLevel] =
+    typelevel.GetQueriesAt[TopLevel]
 
   def runner(req: Request[TopLevel]): Response[TopLevel] =
     typelevel.RunHandler[Id, TopLevel](fetcher, req)
 
   lazy val sz: Serializer[Csz.Params, TopLevel] =
     TopLevel[form.Serializer[Csz.Params]](
-      name = ((), (), Csz.circeSection),
-      age = ((), (), Csz.circeSection),
       getRoot = ((), (), User.sz),
       getUser = (Csz.circeSection, (), User.sz),
       getAllUsers = ((), (), User.sz)

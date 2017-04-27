@@ -35,6 +35,15 @@ object Identity {
   val req0: Request[Identity] =
     typelevel.NullRequest[Identity]
 
+  val req1: Request[Identity] =
+    Identity[form.Request](
+      keyName = true,
+      secret = true
+    )
+
+  val reqCombined: Request[Identity] =
+    typelevel.MergeRequests[Identity](req0, req1)
+
   implicit val q: QueriesAt[Identity] =
     typelevel.GetQueriesAt[Identity]
 

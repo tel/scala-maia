@@ -21,7 +21,8 @@ trait MergeRequests[T[_ <: Dsl]] {
 object MergeRequests {
 
   def apply[T[_ <: Dsl]](r1: Request[T], r2: Request[T])(
-    implicit merger: MergeRequests[T]): Request[T] = merger(r1, r2)
+    implicit merger: Lazy[MergeRequests[T]]): Request[T] =
+    merger.value(r1, r2)
 
   implicit def mergeRequestsG[T[_ <: Dsl], L <: HList](
     implicit generic: Generic.Aux[Request[T], L],
@@ -47,24 +48,25 @@ object MergeRequests {
     implicit def Set[Ag]: Case.Aux[Set[Ag], Set[Ag], Set[Ag]] =
       at { case (a, b) => a union b }
 
-    implicit def Option[S[_ <: Dsl]](implicit merger: MergeRequests[S])
+    implicit def Option[S[_ <: Dsl]](implicit merger: Lazy[MergeRequests[S]])
       : Case.Aux[Option[Request[S]], Option[Request[S]], Option[Request[S]]] =
       at {
         case (None, r) => r
         case (l, None) => l
         case (Some(l), Some(r)) =>
-          Some(merger(l, r))
+          Some(merger.value(l, r))
       }
 
     implicit def HashMap[Ag, S[_ <: Dsl]](
-      implicit merger: MergeRequests[S]): Case.Aux[HashMap[Ag, Request[S]],
-                                                   HashMap[Ag, Request[S]],
-                                                   HashMap[Ag, Request[S]]] =
+      implicit merger: Lazy[MergeRequests[S]])
+      : Case.Aux[HashMap[Ag, Request[S]],
+                 HashMap[Ag, Request[S]],
+                 HashMap[Ag, Request[S]]] =
       at {
         case (l, r) =>
           l.merged(r) {
             case ((lk, lv), (_, rv)) =>
-              (lk, merger(lv, rv))
+              (lk, merger.value(lv, rv))
           }
       }
 

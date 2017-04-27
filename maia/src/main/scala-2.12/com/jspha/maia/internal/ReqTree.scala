@@ -6,6 +6,7 @@ package com.jspha.maia.internal
 
 import scala.language.higherKinds
 import com.jspha.maia._
+import shapeless.Lazy
 
 /**
   * A [[ReqTree]] is a binary, non-empty tree of [[Request]]s.
@@ -23,8 +24,8 @@ sealed trait ReqTree[T[_ <: Dsl]] {
   /**
     * Pass once through the [[ReqTree]] and compute the combined [[Request]].
     */
-  def request(implicit merger: typelevel.MergeRequests[T]): Request[T] =
-    merger.mergeTree(this)
+  def request(implicit merger: Lazy[typelevel.MergeRequests[T]]): Request[T] =
+    merger.value.mergeTree(this)
 
   def *(other: ReqTree[T]): ReqTree[T] = ReqTree.Branch[T](this, other)
 }

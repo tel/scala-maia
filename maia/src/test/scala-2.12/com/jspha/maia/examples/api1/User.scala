@@ -55,8 +55,29 @@ object User {
   val req0: Request[User] =
     typelevel.NullRequest[User]
 
-//  val q: QueriesAt[User] =
-//    typelevel.GetQueriesAt[User]
+  val req1: Request[User] =
+    User[form.Request](
+      name = true,
+      age = true,
+      hometown = None,
+      mother = Some(
+        User[form.Request](
+          name = true,
+          age = false,
+          hometown = None,
+          mother = None,
+          lastKnownLocation = None,
+          getId = None
+        )),
+      lastKnownLocation = Some(Location.req0),
+      getId = Some(Identity.req0)
+    )
+
+  val reqCombined: Request[User] =
+    typelevel.MergeRequests[User](req0, req1)
+
+  implicit lazy val q: QueriesAt[User] =
+    typelevel.GetQueriesAt[User]
 
   def runner(req: Request[User]): Response[User] =
     typelevel.RunHandler[Id, User](fetch(Root), req)

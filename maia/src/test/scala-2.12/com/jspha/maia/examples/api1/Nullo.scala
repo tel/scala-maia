@@ -18,6 +18,12 @@ object Nullo {
   val req0: Request[Nullo] =
     typelevel.NullRequest[Nullo]
 
+  val req1: Request[Nullo] =
+    Nullo[form.Request]()
+
+  val reqCombined: Request[Nullo] =
+    typelevel.MergeRequests[Nullo](req0, req1)
+
   val q: QueriesAt[Nullo] =
     typelevel.GetQueriesAt[Nullo]
 

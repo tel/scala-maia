@@ -167,7 +167,6 @@ object GetQueriesAt {
                          ReqL <: HList,
                          RespL <: HList](
       implicit kWitness: Witness.Aux[K],
-      recur: Lazy[GetQueriesAt[U]],
       reqGeneric: LabelledGeneric.Aux[Request[T], ReqL],
       respGeneric: LabelledGeneric.Aux[Response[T], RespL],
       reqUpdater: Updater.Aux[ReqL,
@@ -184,16 +183,13 @@ object GetQueriesAt {
       def injectReq(f: form.Request#ObjK[U, As, Es, S]): Request[T] =
         reqGeneric.from(reqUpdater(reqGeneric.to(req0()), field[K](f)))
 
-      at(
-        field[K](
-          objBuilder(kWitness.value, recur.value(), projectResp, injectReq)))
+      at(field[K](objBuilder(kWitness.value, projectResp, injectReq)))
 
     }
 
     trait ObjBuilder[
       T[_ <: Dsl], U[_ <: Dsl], As <: ArgSpec, Es <: ErrSpec, S <: Size] {
       def apply(name: Symbol,
-                queriesAt: QueriesAt[U],
                 projectResp: Response[T] => form.Response#ObjK[U, As, Es, S],
                 injectReq: form.Request#ObjK[U, As, Es, S] => Request[T])
         : Field.Obj[U, form.QueriesAt[T], As, Es, S]
@@ -206,13 +202,11 @@ object GetQueriesAt {
         collOps: Size.Ops[S]
       ): ObjBuilder[T, U, NoArg, NoErr, S] =
         (name: Symbol,
-         queriesAt: QueriesAt[U],
          projectResp: Response[T] => Option[S#Coll[Response[U]]],
          injectReq: Option[Request[U]] => Request[T]) =>
           Field.Obj[U, form.QueriesAt[T], NoArg, NoErr, S](
             new Query.Transformer[T, U, Nothing, S] {
-              def apply[R](cont: QueriesAt[U] => Query[U, Nothing, R]) = {
-                val subQ: Query[U, Nothing, R] = cont(queriesAt)
+              def apply[R](subQ: Query[U, Nothing, R]) = {
                 Query[T, Nothing, S#Coll[R]](
                   requests = ReqTree[T](injectReq(Some(subQ.request(merger)))),
                   handleResponse = (resp: Response[T]) =>
@@ -238,13 +232,11 @@ object GetQueriesAt {
         collOps: Size.Ops[S]
       ): ObjBuilder[T, U, NoArg, HasErr[E], S] =
         (name: Symbol,
-         queriesAt: QueriesAt[U],
          projectResp: Response[T] => Option[Either[E, S#Coll[Response[U]]]],
          injectReq: Option[Request[U]] => Request[T]) =>
           Field.Obj[U, form.QueriesAt[T], NoArg, HasErr[E], S](
             new Query.Transformer[T, U, E, S] {
-              def apply[R](cont: QueriesAt[U] => Query[U, E, R]) = {
-                val subQ: Query[U, E, R] = cont(queriesAt)
+              def apply[R](subQ: Query[U, E, R]) = {
                 Query[T, E, S#Coll[R]](
                   requests = ReqTree[T](injectReq(Some(subQ.request(merger)))),
                   handleResponse = (resp: Response[T]) =>
@@ -272,14 +264,12 @@ object GetQueriesAt {
         collOps: Size.Ops[S]
       ): ObjBuilder[T, U, HasArg[Ag], NoErr, S] =
         (name: Symbol,
-         queriesAt: QueriesAt[U],
          projectResp: Response[T] => HashMap[Ag, S#Coll[Response[U]]],
          injectReq: HashMap[Ag, Request[U]] => Request[T]) =>
           Field.Obj[U, form.QueriesAt[T], HasArg[Ag], NoErr, S](
             (ag: Ag) =>
               new Query.Transformer[T, U, Nothing, S] {
-                def apply[R](cont: QueriesAt[U] => Query[U, Nothing, R]) = {
-                  val subQ: Query[U, Nothing, R] = cont(queriesAt)
+                def apply[R](subQ: Query[U, Nothing, R]) = {
                   Query[T, Nothing, S#Coll[R]](
                     requests = ReqTree[T](
                       injectReq(HashMap(ag -> subQ.request(merger)))),
@@ -306,15 +296,13 @@ object GetQueriesAt {
         collOps: Size.Ops[S]
       ): ObjBuilder[T, U, HasArg[Ag], HasErr[E], S] =
         (name: Symbol,
-         queriesAt: QueriesAt[U],
          projectResp: Response[T] => HashMap[Ag,
                                              Either[E, S#Coll[Response[U]]]],
          injectReq: HashMap[Ag, Request[U]] => Request[T]) =>
           Field.Obj[U, form.QueriesAt[T], HasArg[Ag], HasErr[E], S](
             (ag: Ag) =>
               new Query.Transformer[T, U, E, S] {
-                def apply[R](cont: QueriesAt[U] => Query[U, E, R]) = {
-                  val subQ: Query[U, E, R] = cont(queriesAt)
+                def apply[R](subQ: Query[U, E, R]) = {
                   Query[T, E, S#Coll[R]](
                     requests = ReqTree[T](
                       injectReq(HashMap(ag -> subQ.request(merger)))),

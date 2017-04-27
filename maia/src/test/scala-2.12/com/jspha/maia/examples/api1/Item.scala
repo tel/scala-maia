@@ -45,6 +45,15 @@ object Item {
   val req0: Request[Item] =
     typelevel.NullRequest[Item]
 
+  val req1: Request[Item] =
+    Item[form.Request](
+      name = false,
+      cost = Set(USD)
+    )
+
+  val reqCombined: Request[Item] =
+    typelevel.MergeRequests[Item](req0, req1)
+
   val q: QueriesAt[Item] =
     typelevel.GetQueriesAt[Item]
 

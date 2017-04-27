@@ -8,6 +8,7 @@ import cats._
 import cats.data.Validated
 import cats.syntax.cartesian._
 import com.jspha.maia.internal.ReqTree
+import shapeless.Lazy
 
 import scala.language.higherKinds
 
@@ -30,7 +31,7 @@ final case class Query[T[_ <: Dsl], +E, +R](
   def map[S](f: R => S): Query[T, E, S] =
     copy[T, E, S](handleResponse = resp => handleResponse(resp).map(f))
 
-  def request(implicit merger: typelevel.MergeRequests[T]): Request[T] =
+  def request(implicit merger: Lazy[typelevel.MergeRequests[T]]): Request[T] =
     requests.request(merger)
 
   // scalastyle:off
@@ -52,7 +53,7 @@ final case class Query[T[_ <: Dsl], +E, +R](
 object Query {
 
   trait Transformer[S[_ <: Dsl], T[_ <: Dsl], E, C <: Size] {
-    def apply[R](cont: QueriesAt[T] => Query[T, E, R]): Query[S, E, C#Coll[R]]
+    def apply[R](subQuery: Query[T, E, R]): Query[S, E, C#Coll[R]]
   }
 
   implicit def QueryIsFunctor[T[_ <: Dsl], E]: Functor[Query[T, E, ?]] =

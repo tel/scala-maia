@@ -24,6 +24,15 @@ object Location {
   val req0: Request[Location] =
     typelevel.NullRequest[Location]
 
+  val req1: Request[Location] =
+    Location[form.Request](
+      latitude = true,
+      longitude = false
+    )
+
+  val reqCombined: Request[Location] =
+    typelevel.MergeRequests[Location](req0, req1)
+
   val q: QueriesAt[Location] =
     typelevel.GetQueriesAt[Location]
 
