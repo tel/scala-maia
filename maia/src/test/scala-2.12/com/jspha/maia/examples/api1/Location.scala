@@ -41,8 +41,16 @@ object Location {
 
   val sz: Serializer[Csz.Params, Location] =
     Location[form.Serializer[Csz.Params]](
-      latitude = ((), (), Csz.circeSection),
-      longitude = ((), (), Csz.circeSection)
+      latitude = form.Serializer
+        .Atom[Csz.Params, Double, NoArg, NoErr, One]((), (), Csz.circeSection),
+      longitude = form.Serializer
+        .Atom[Csz.Params, Double, NoArg, NoErr, One]((), (), Csz.circeSection)
     )
+
+//  val serializedReq0: String =
+//    serialization.RequestEncoder[Csz.Params, Location].apply(sz, req0).noSpaces
+//
+//  val serializedReq1: String =
+//    serialization.RequestEncoder[Csz.Params, Location].apply(sz, req1).noSpaces
 
 }

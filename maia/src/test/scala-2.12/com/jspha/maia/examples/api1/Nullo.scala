@@ -33,4 +33,10 @@ object Nullo {
   val sz: Serializer[Csz.Params, Nullo] =
     Nullo[form.Serializer[Csz.Params]]()
 
+//  val serializedReq0: String =
+//    serialization.RequestEncoder[Csz.Params, Nullo].apply(sz, req0).noSpaces
+//
+//  val serializedReq1: String =
+//    serialization.RequestEncoder[Csz.Params, Nullo].apply(sz, req1).noSpaces
+
 }

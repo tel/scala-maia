@@ -44,9 +44,13 @@ object City {
 
   lazy val sz: Serializer[Csz.Params, City] =
     City[form.Serializer[Csz.Params]](
-      name = ((), (), Csz.circeSection),
-      location = ((), (), Location.sz),
-      mayor = ((), (), User.sz)
+      name = form.Serializer
+        .Atom[Csz.Params, String, NoArg, NoErr, One]((), (), Csz.circeSection),
+      location = form.Serializer
+        .Obj[Csz.Params, Location, NoArg, NoErr, One]((), (), Location.sz),
+      mayor = form.Serializer.Obj[Csz.Params, User, NoArg, NoErr, Opt]((),
+                                                                       (),
+                                                                       User.sz)
     )
 
 }

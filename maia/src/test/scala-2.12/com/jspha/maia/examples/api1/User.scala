@@ -84,12 +84,20 @@ object User {
 
   lazy val sz: Serializer[Csz.Params, User] =
     User[form.Serializer[Csz.Params]](
-      name = ((), (), Csz.circeSection),
-      age = ((), (), Csz.circeSection),
-      hometown = ((), (), City.sz),
-      mother = ((), (), sz),
-      lastKnownLocation = ((), (), Location.sz),
-      getId = ((), (), Identity.sz)
+      name = form.Serializer
+        .Atom[Csz.Params, String, NoArg, NoErr, One]((), (), Csz.circeSection),
+      age = form.Serializer
+        .Atom[Csz.Params, Int, NoArg, NoErr, One]((), (), Csz.circeSection),
+      hometown =
+        form.Serializer.Obj[Csz.Params, City, NoArg, NoErr, One]((),
+                                                                 (),
+                                                                 City.sz),
+      mother =
+        form.Serializer.Obj[Csz.Params, User, NoArg, NoErr, Opt]((), (), sz),
+      lastKnownLocation = form.Serializer
+        .Obj[Csz.Params, Location, NoArg, NoErr, One]((), (), Location.sz),
+      getId = form.Serializer
+        .Obj[Csz.Params, Identity, NoArg, NoErr, One]((), (), Identity.sz)
     )
 
 }

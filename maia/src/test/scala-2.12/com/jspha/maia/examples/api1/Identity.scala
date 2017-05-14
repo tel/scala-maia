@@ -52,8 +52,13 @@ object Identity {
 
   val sz: Serializer[Csz.Params, Identity] =
     Identity[form.Serializer[Csz.Params]](
-      keyName = ((), (), Csz.circeSection),
-      secret = ((), Csz.circeSection, Csz.circeSection)
+      keyName = form.Serializer
+        .Atom[Csz.Params, String, NoArg, NoErr, One]((), (), Csz.circeSection),
+      secret =
+        form.Serializer.Atom[Csz.Params, String, NoArg, HasErr[Error], One](
+          (),
+          Csz.circeSection,
+          Csz.circeSection)
     )
 
 }

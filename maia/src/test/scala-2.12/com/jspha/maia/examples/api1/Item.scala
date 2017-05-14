@@ -62,8 +62,13 @@ object Item {
 
   val sz: Serializer[Csz.Params, Item] =
     Item[form.Serializer[Csz.Params]](
-      name = ((), (), Csz.circeSection),
-      cost = (Csz.circeSection, Csz.circeSection, Csz.circeSection)
+      name = form.Serializer
+        .Atom[Csz.Params, String, NoArg, NoErr, One]((), (), Csz.circeSection),
+      cost = form.Serializer
+        .Atom[Csz.Params, Double, HasArg[Currency], HasErr[Error], One](
+          Csz.circeSection,
+          Csz.circeSection,
+          Csz.circeSection)
     )
 
 }

@@ -49,9 +49,9 @@ object TopLevel {
 
   lazy val sz: Serializer[Csz.Params, TopLevel] =
     TopLevel[form.Serializer[Csz.Params]](
-      getRoot = ((), (), User.sz),
-      getUser = (Csz.circeSection, (), User.sz),
-      getAllUsers = ((), (), User.sz)
+      getRoot = form.Serializer.Obj[Csz.Params, User, NoArg, NoErr, One]((), (), User.sz),
+      getUser = form.Serializer.Obj[Csz.Params, User, HasArg[User.UID], NoErr, One](Csz.circeSection, (), User.sz),
+      getAllUsers = form.Serializer.Obj[Csz.Params, User, NoArg, NoErr, Many]((), (), User.sz)
     )
 
 }

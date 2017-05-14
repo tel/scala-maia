@@ -27,9 +27,6 @@ lazy val commonSettings = Seq(
   resolvers += Resolver.sonatypeRepo("snapshots"),
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
   libraryDependencies ++= Seq(
-    "io.circe" %%% "circe-core" % circeVersion,
-    "io.circe" %%% "circe-generic" % circeVersion,
-    "io.circe" %%% "circe-parser" % circeVersion,
     "org.typelevel" %%% "cats" % catsVersion,
     "com.chuusai" %%% "shapeless" % shapelessVersion
   )
@@ -56,7 +53,10 @@ lazy val maia = crossProject
   .settings(
     name := "maia",
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "utest" % uTestVersion % "test"
+      "com.lihaoyi" %%% "utest" % uTestVersion % "test",
+      "io.circe" %%% "circe-core" % circeVersion % "test",
+      "io.circe" %%% "circe-generic" % circeVersion % "test",
+      "io.circe" %%% "circe-parser" % circeVersion % "test"
     ),
     testFrameworks +=
       new TestFramework("utest.runner.Framework"),
@@ -82,6 +82,33 @@ testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle
 
 // ----------------------------------------------------------------------------
 // Auxiliary Libraries
+
+lazy val maiaCirce = crossProject
+  .crossType(CrossType.Pure)
+  .in(file("maia-circe"))
+  .dependsOn(maia)
+  .settings(commonSettings: _*)
+  .settings(
+    name := "maia-circe",
+    libraryDependencies ++= Seq(
+      "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-generic" % circeVersion,
+      "io.circe" %%% "circe-parser" % circeVersion,
+      "com.lihaoyi" %%% "utest" % uTestVersion % "test"
+    ),
+    testFrameworks +=
+      new TestFramework("utest.runner.Framework"),
+    wartremoverErrors ++= Warts.allBut(
+      Wart.Any,
+      Wart.AsInstanceOf,
+      Wart.ExplicitImplicitTypes,
+      Wart.Nothing,
+      Wart.Overloading
+    )
+  )
+
+lazy val maiaCirceJVM = maiaCirce.jvm
+lazy val maiaCirceJS = maiaCirce.js
 
 lazy val maiaHttp4s = project
   .in(file("maia-http4s"))
